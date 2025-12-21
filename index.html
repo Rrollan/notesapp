@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Canvas v8: Secure & Backup</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --dot-color: #333;
+            --node-bg: #262626;
+            --node-border: #444;
+            --node-text: #ddd;
+            --node-selected: #7b68ee;
+            --line-color: #888;
+            --handle-color: #666;
+            --handle-hover: #e53935;
+            --handle-snap: #00e676;
+            --modal-bg: #2d2d2d;
+            --sidebar-bg: #181818;
+            --sidebar-width: 220px;
+            --accent: #7b68ee;
+            --task-done-color: #00e676;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            color: var(--node-text);
+            user-select: none;
+        }
+
+        /* --- SIDEBAR --- */
+        #sidebar {
+            position: fixed; top: 0; left: 0; height: 100%;
+            width: var(--sidebar-width); background: var(--sidebar-bg);
+            border-right: 1px solid #333; z-index: 2000;
+            display: flex; flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 15px; font-weight: bold; font-size: 1rem; color: #fff;
+            border-bottom: 1px solid #333;
+        }
+        .sidebar-hint {
+            font-size: 0.7rem; color: #666; padding: 0 15px 10px 15px; border-bottom: 1px solid #333;
+        }
+        .space-list { flex-grow: 1; overflow-y: auto; padding: 10px; }
+        .space-item {
+            padding: 10px; margin-bottom: 5px; border-radius: 6px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            color: #aaa; transition: 0.2s;
+        }
+        .space-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .space-item.active { background: var(--accent); color: #fff; }
+        .space-item-name { flex-grow: 1; overflow: hidden; text-overflow: ellipsis; }
+        .space-del { opacity: 0; cursor: pointer; font-size: 0.8rem; padding: 4px 8px; margin-left: 5px; }
+        .space-item:hover .space-del { opacity: 1; }
+        .space-del:hover { background: rgba(255, 100, 100, 0.2); border-radius: 4px; color: #ff8a80; }
+        
+        .add-space-btn {
+            background: transparent; border: 1px dashed #555; color: #888;
+            margin: 5px 10px; padding: 8px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .add-space-btn:hover { border-color: #888; color: #fff; background: rgba(255,255,255,0.05); }
+
+        /* BACKUP SECTION */
+        .backup-section {
+            border-top: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 8px;
+        }
+        .backup-btn {
+            background: #252525; color: #ccc; border: 1px solid #444; padding: 8px;
+            border-radius: 6px; cursor: pointer; font-size: 0.8rem; text-align: center;
+        }
+        .backup-btn:hover { background: #333; color: #fff; }
+        .backup-btn.restore { color: #82b1ff; border-color: #3d4c63; }
+
+        /* --- UI LAYER --- */
+        #ui-layer {
+            position: fixed; top: 10px; left: calc(var(--sidebar-width) + 15px); z-index: 1000;
+            display: flex; gap: 8px; flex-direction: column; pointer-events: none;
+        }
+        .toolbar {
+            background: rgba(30, 30, 30, 0.95); padding: 8px; border-radius: 8px;
+            backdrop-filter: blur(5px); border: 1px solid #444;
+            display: flex; gap: 5px; flex-wrap: wrap; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); pointer-events: auto;
+        }
+        .btn {
+            background: #3a3a3a; border: none; color: #fff; padding: 6px 12px;
+            border-radius: 4px; cursor: pointer; font-size: 0.85rem; transition: 0.2s;
+        }
+        .btn:hover { background: #505050; }
+        .btn.primary { background: var(--node-selected); }
+        .btn.danger { color: #ff8a80; }
+
+        /* --- CANVAS --- */
+        #viewport { 
+            position: absolute; top:0; left: var(--sidebar-width); 
+            width: calc(100% - var(--sidebar-width)); height: 100%; 
+            cursor: grab; overflow: hidden;
+        }
+        #viewport:active { cursor: grabbing; }
+
+        #world {
+            position: absolute; top: 0; left: 0; transform-origin: 0 0;
+            background-image: radial-gradient(var(--dot-color) 1.5px, transparent 1.5px);
+            background-size: 25px 25px;
+        }
+
+        #connections-layer {
+            position: absolute; top: -50000px; left: -50000px;
+            width: 100000px; height: 100000px; pointer-events: none; z-index: 0;
+        }
+        path.connection {
+            fill: none; stroke: var(--line-color); stroke-width: 2px;
+            pointer-events: stroke; transition: stroke 0.1s;
+            marker-end: url(#arrowhead);
+        }
+        path.connection.temp { pointer-events: none; stroke-dasharray: 5,5; opacity: 0.6; }
+        path.connection:hover { stroke: #fff; stroke-width: 3px; cursor: pointer; }
+
+        /* --- NODES --- */
+        .node {
+            position: absolute; min-width: 160px; min-height: 80px;
+            background: var(--node-bg); border: 2px solid transparent;
+            border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            display: flex; flex-direction: column; z-index: 1; box-sizing: border-box; 
+        }
+        .node:hover { border-color: rgba(255,255,255,0.1); }
+        .node.selected { border-color: var(--node-selected) !important; z-index: 10; }
+        
+        .node.color-red { background: #3c1f1f; }
+        .node.color-green { background: #1f3c25; }
+        .node.color-blue { background: #1f2c3c; }
+        .node.color-yellow { background: #3c381f; }
+        .node.shape-rect { border-radius: 4px; }
+        .node.shape-round { border-radius: 28px; }
+        .node.shape-round .node-header { border-radius: 28px 28px 0 0; padding: 10px 20px; }
+
+        .node-header {
+            padding: 10px 12px; font-weight: 600; font-size: 0.95rem;
+            background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(0,0,0,0.2);
+            border-radius: 12px 12px 0 0; cursor: grab;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-text {
+            outline: none; border-bottom: 1px solid transparent; transition: 0.2s;
+            max-width: 85%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; user-select: text;
+        }
+        .header-text:focus { cursor: text; border-bottom: 1px solid var(--node-selected); }
+
+        .node-content {
+            padding: 12px; font-size: 0.9rem; line-height: 1.5; outline: none;
+            color: #ddd; word-break: break-word; cursor: text; flex-grow: 1; user-select: text;
+        }
+        
+        .content-img, .content-video { padding: 0; display: flex; justify-content: center; background: #000; border-radius: 0 0 12px 12px; overflow: hidden; }
+        .content-img img { width: 100%; height: auto; display: block; pointer-events: none; }
+        .content-video iframe, .content-video video { width: 100%; height: 100%; min-height: 200px; border: none; }
+        
+        /* Resizer */
+        .resizer {
+            position: absolute; right: 0; bottom: 0; width: 15px; height: 15px;
+            cursor: se-resize; background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.3) 50%);
+            border-bottom-right-radius: 10px; z-index: 25; opacity: 0; transition: opacity 0.2s;
+        }
+        .node:hover .resizer { opacity: 1; }
+
+        /* Tasks */
+        .task-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .task-check { width: 20px; height: 20px; min-width: 20px; border: 2px solid #666; border-radius: 50%; cursor: pointer; position: relative; margin-top: 2px; }
+        .task-input { background: transparent; border: none; color: #ddd; font-size: 0.9rem; width: 100%; outline: none; }
+        .task-date { background: rgba(0,0,0,0.2); border: 1px solid #444; color: #999; font-size: 0.75rem; padding: 2px 4px; border-radius: 4px; cursor: pointer; }
+        .task-row.done { opacity: 0.5; }
+        .task-row.done .task-check { background: var(--task-done-color); border-color: var(--task-done-color); }
+        .task-row.done .task-input { text-decoration: line-through; }
+        .add-task-btn { width: 100%; padding: 5px; background: rgba(255,255,255,0.05); border: 1px dashed #555; color: #888; border-radius: 4px; cursor: pointer; }
+
+        /* Handles */
+        .handle {
+            position: absolute; width: 24px; height: 24px; background: transparent; cursor: crosshair; z-index: 20;
+            display: flex; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s;
+        }
+        .handle::after { content: ''; width: 8px; height: 8px; background: var(--handle-color); border-radius: 50%; border: 1px solid rgba(0,0,0,0.5); transition: 0.2s; }
+        .node:hover .handle, .handle.snap-active { opacity: 1; }
+        .handle:hover::after { background: var(--handle-hover); transform: scale(1.4); }
+        .handle.snap-active::after { background: var(--handle-snap); transform: scale(1.6); box-shadow: 0 0 10px var(--handle-snap); }
+        .h-top { top: -12px; left: 50%; transform: translateX(-50%); }
+        .h-right { right: -12px; top: 50%; transform: translateY(-50%); }
+        .h-bottom { bottom: -12px; left: 50%; transform: translateX(-50%); }
+        .h-left { left: -12px; top: 50%; transform: translateY(-50%); }
+
+        /* Floating Menu */
+        #style-menu {
+            position: absolute; display: none; z-index: 2000; background: #2a2a2a; padding: 6px; border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); border: 1px solid #444; gap: 6px; align-items: center; pointer-events: auto; transform: translate(-50%, -130%);
+        }
+        .color-btn { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #555; cursor: pointer; transition: transform 0.2s; }
+        .color-btn:hover { transform: scale(1.2); border-color: #fff; }
+
+        /* --- UNIFIED MODAL --- */
+        #modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            z-index: 5000; display: none; justify-content: center; align-items: center;
+        }
+        #modal-box {
+            background: var(--modal-bg); width: 340px; padding: 25px;
+            border-radius: 12px; border: 1px solid #444; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        #modal-title { margin: 0; color: #fff; font-size: 1.1rem; }
+        #modal-message { font-size: 0.9rem; color: #ccc; line-height: 1.4; }
+        #modal-body { display: flex; flex-direction: column; gap: 10px; }
+        .modal-input {
+            background: #1a1a1a; border: 1px solid #555; color: #fff;
+            padding: 10px; border-radius: 6px; outline: none; width: 100%; box-sizing: border-box; font-size: 0.95rem;
+        }
+        .modal-input:focus { border-color: var(--accent); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+        
+        #hidden-file-input { display: none; }
+        #backup-file-input { display: none; }
+    </style>
+</head>
+<body>
+
+    <input type="file" id="hidden-file-input" multiple>
+    <input type="file" id="backup-file-input" accept=".json">
+
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+        <div class="sidebar-header">Пространства</div>
+        <div class="sidebar-hint">DblClick для переименования</div>
+        <div class="space-list" id="space-list"></div>
+        <button class="add-space-btn" onclick="openCreateSpaceModal()">+ Новое пространство</button>
+        
+        <!-- BACKUP BUTTONS -->
+        <div class="backup-section">
+            <button class="backup-btn" onclick="downloadBackup()">↓ Скачать резервную копию</button>
+            <button class="backup-btn restore" onclick="triggerRestore()">↑ Восстановить из файла</button>
+        </div>
+    </div>
+
+    <!-- UI -->
+    <div id="ui-layer">
+        <div class="toolbar">
+            <button class="btn primary" onclick="spawnNode('text')">Текст</button>
+            <button class="btn" onclick="openMediaModal('image')">Картинка</button>
+            <button class="btn" onclick="openMediaModal('video')">Видео</button>
+            <button class="btn" onclick="spawnNode('task')">Задачи</button>
+            <button class="btn" onclick="openLinkModal()">Ссылка</button>
+        </div>
+        <div class="toolbar">
+            <button class="btn danger" onclick="confirmClearCanvas()">Очистить</button>
+            <span style="font-size: 11px; color:#888; align-self: center;">Delete: Удалить | Drag угол: Размер</span>
+        </div>
+    </div>
+
+    <!-- Floating Menu -->
+    <div id="style-menu">
+        <div class="color-btn" style="background:#262626;" onclick="applyStyle('color', 'default')"></div>
+        <div class="color-btn" style="background:#3c1f1f;" onclick="applyStyle('color', 'red')"></div>
+        <div class="color-btn" style="background:#1f3c25;" onclick="applyStyle('color', 'green')"></div>
+        <div class="color-btn" style="background:#1f2c3c;" onclick="applyStyle('color', 'blue')"></div>
+        <div class="color-btn" style="background:#3c381f;" onclick="applyStyle('color', 'yellow')"></div>
+        <div style="width: 1px; height: 15px; background: #555; margin: 0 4px;"></div>
+        <button class="btn" style="padding: 2px 6px; font-size: 10px;" onclick="applyStyle('shape', 'default')">Rect</button>
+        <button class="btn" style="padding: 2px 6px; font-size: 10px;" onclick="applyStyle('shape', 'round')">Round</button>
+        <div style="width: 1px; height: 15px; background: #555; margin: 0 4px;"></div>
+        <button class="btn danger" style="padding: 2px 6px; font-size: 12px; font-weight:bold;" onclick="deleteSelectedNode()" title="Удалить">✕</button>
+    </div>
+
+    <!-- UNIFIED MODAL -->
+    <div id="modal-overlay">
+        <div id="modal-box">
+            <h3 id="modal-title">Заголовок</h3>
+            <div id="modal-message" style="display:none;"></div>
+            <div id="modal-body"></div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal()">Отмена</button>
+                <button id="modal-confirm-btn" class="btn primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewport">
+        <div id="world">
+            <svg id="connections-layer" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <marker id="arrowhead" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill="#888" />
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+    </div>
+
+<script>
+    // --- STORAGE & CONFIG ---
+    let spaces = JSON.parse(localStorage.getItem('ob_spaces')) || ['Main'];
+    let currentSpace = localStorage.getItem('ob_currentSpace') || 'Main';
+    const SVG_OFFSET = 50000;
+
+    // --- STATE ---
+    const viewport = document.getElementById('viewport');
+    const world = document.getElementById('world');
+    const svgLayer = document.getElementById('connections-layer');
+    const fileInput = document.getElementById('hidden-file-input');
+    const backupInput = document.getElementById('backup-file-input');
+    const styleMenu = document.getElementById('style-menu');
+    
+    // Modal Elements
+    const modal = document.getElementById('modal-overlay');
+    const modalTitle = document.getElementById('modal-title');
+    const modalMsg = document.getElementById('modal-message');
+    const modalBody = document.getElementById('modal-body');
+    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+
+    let state = { scale: 1, panX: window.innerWidth/2, panY: window.innerHeight/2 };
+    let nodes = [];
+    let edges = [];
+    let idCounter = 1;
+    let historyStack = [];
+    let selectedNodeId = null;
+
+    let dragObj = null; 
+    let connectStart = null; 
+    let tempLine = null;
+    let mousePos = { x: window.innerWidth/2 + 110, y: window.innerHeight/2 }; 
+
+    // --- INIT ---
+    function init() {
+        renderSpacesSidebar();
+        loadSpaceData(currentSpace);
+        window.addEventListener('beforeunload', saveCurrentSpaceData);
+    }
+
+    // --- BACKUP SYSTEM ---
+    function downloadBackup() {
+        saveCurrentSpaceData(); // Ensure current is saved
+        const backupData = {};
+        // Collect all localStorage keys related to our app
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('ob_')) {
+                backupData[key] = localStorage.getItem(key);
+            }
+        });
+        
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], {type : 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `canvas-backup-${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function triggerRestore() {
+        backupInput.click();
+    }
+
+    backupInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const data = JSON.parse(ev.target.result);
+                // Validate minimal structure check
+                if (!data.ob_spaces) throw new Error("Invalid backup file");
+
+                // Clear current app data
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('ob_')) localStorage.removeItem(key);
+                });
+
+                // Restore
+                Object.keys(data).forEach(key => {
+                    localStorage.setItem(key, data[key]);
+                });
+
+                alert("Успешно восстановлено! Страница перезагрузится.");
+                location.reload();
+            } catch (err) {
+                alert("Ошибка при чтении файла бэкапа: " + err.message);
+            }
+        };
+        reader.readAsText(file);
+        backupInput.value = '';
+    };
+
+
+    // --- MATH HELPERS ---
+    function getWorldMousePosition(screenX, screenY) {
+        const sx = screenX !== undefined ? screenX : mousePos.x;
+        const sy = screenY !== undefined ? screenY : mousePos.y;
+        const rect = viewport.getBoundingClientRect();
+        const vx = sx - rect.left;
+        const vy = sy - rect.top;
+        return {
+            x: (vx - state.panX) / state.scale,
+            y: (vy - state.panY) / state.scale
+        };
+    }
+
+    // --- UNIFIED MODAL SYSTEM ---
+    function openModal({ title, message = null, inputPlaceholder = null, inputValue = '', confirmText = 'OK', onConfirm, extraHtml = '' }) {
+        modalTitle.innerText = title;
+        modalMsg.innerText = message || '';
+        modalMsg.style.display = message ? 'block' : 'none';
+        modalBody.innerHTML = extraHtml;
+        
+        let inputEl = null;
+        if (inputPlaceholder !== null) {
+            inputEl = document.createElement('input');
+            inputEl.className = 'modal-input';
+            inputEl.placeholder = inputPlaceholder;
+            inputEl.value = inputValue;
+            modalBody.appendChild(inputEl);
+            setTimeout(() => inputEl.focus(), 100);
+            inputEl.onkeydown = (e) => { if(e.key==='Enter') doConfirm(); };
+        }
+
+        modalConfirmBtn.innerText = confirmText;
+        modalConfirmBtn.onclick = doConfirm;
+
+        function doConfirm() {
+            const val = inputEl ? inputEl.value : null;
+            if (onConfirm(val) !== false) closeModal();
+        }
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        modalBody.innerHTML = '';
+    }
+
+    // --- SPACES ACTIONS ---
+    function renderSpacesSidebar() {
+        const list = document.getElementById('space-list');
+        list.innerHTML = '';
+        spaces.forEach(name => {
+            const div = document.createElement('div');
+            div.className = `space-item ${name === currentSpace ? 'active' : ''}`;
+            div.innerHTML = `
+                <span class="space-item-name">${name}</span>
+                ${spaces.length > 1 ? `<span class="space-del">✕</span>` : ''}
+            `;
+            div.onclick = (e) => {
+                if(e.target.classList.contains('space-del')) confirmDeleteSpace(name);
+                else switchSpace(name);
+            };
+            div.ondblclick = (e) => {
+                if(!e.target.classList.contains('space-del')) openRenameSpaceModal(name);
+            };
+            list.appendChild(div);
+        });
+    }
+
+    function openCreateSpaceModal() {
+        openModal({
+            title: 'Новое пространство', inputPlaceholder: 'Название...',
+            onConfirm: (name) => {
+                if (name && !spaces.includes(name)) {
+                    saveCurrentSpaceData(); spaces.push(name); localStorage.setItem('ob_spaces', JSON.stringify(spaces)); switchSpace(name);
+                }
+            }
+        });
+    }
+
+    function openRenameSpaceModal(oldName) {
+        openModal({
+            title: 'Переименовать', inputPlaceholder: 'Новое имя', inputValue: oldName,
+            onConfirm: (newName) => {
+                if (newName && newName !== oldName && !spaces.includes(newName)) {
+                    saveCurrentSpaceData();
+                    const data = localStorage.getItem(`ob_space_${oldName}`);
+                    if(data) { localStorage.setItem(`ob_space_${newName}`, data); localStorage.removeItem(`ob_space_${oldName}`); }
+                    spaces[spaces.indexOf(oldName)] = newName; localStorage.setItem('ob_spaces', JSON.stringify(spaces));
+                    if(currentSpace === oldName) { currentSpace = newName; localStorage.setItem('ob_currentSpace', newName); }
+                    renderSpacesSidebar();
+                }
+            }
+        });
+    }
+
+    function confirmDeleteSpace(name) {
+        openModal({
+            title: 'Удалить пространство?', message: `Вы уверены, что хотите удалить "${name}"?`, confirmText: 'Удалить',
+            onConfirm: () => {
+                spaces = spaces.filter(s => s !== name); localStorage.removeItem(`ob_space_${name}`); localStorage.setItem('ob_spaces', JSON.stringify(spaces));
+                if(currentSpace === name) switchSpace(spaces[0]); else renderSpacesSidebar();
+            }
+        });
+    }
+
+    function switchSpace(name) {
+        if(name === currentSpace) return;
+        saveCurrentSpaceData(); currentSpace = name; localStorage.setItem('ob_currentSpace', name); loadSpaceData(name); renderSpacesSidebar();
+    }
+
+    function saveCurrentSpaceData() {
+        const data = { nodes, edges, idCounter, state };
+        localStorage.setItem(`ob_space_${currentSpace}`, JSON.stringify(data));
+    }
+
+    function loadSpaceData(name) {
+        const raw = localStorage.getItem(`ob_space_${name}`);
+        if(raw) {
+            const data = JSON.parse(raw);
+            nodes = data.nodes || []; edges = data.edges || []; idCounter = data.idCounter || 1;
+        } else {
+            nodes = []; edges = []; idCounter = 1;
+            addNodeData({ x: 50, y: 50, type: 'text', title: 'Start', content: 'Добро пожаловать' });
+        }
+        historyStack = []; deselectNode(); renderAll(); updateTransform();
+    }
+
+    // --- NODE ACTIONS ---
+    function addNodeData(data) {
+        recordAction();
+        const id = data.id || ('node-' + idCounter++);
+        const w = data.width || (['video','image'].includes(data.type) ? 400 : 250);
+        const newNode = { ...data, id, width: w, color: data.color||'default', shape: data.shape||'default' };
+        nodes.push(newNode); saveCurrentSpaceData(); return newNode;
+    }
+
+    function spawnNode(type) {
+        const c = getWorldMousePosition();
+        const cx = c.x - 125; 
+        const cy = c.y - 40;
+        if (type === 'task') {
+            const taskHtml = `<div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" value="Задача" oninput="saveNodeState(this)"><input type="date" class="task-date" onchange="saveNodeState(this)"></div><button class="add-task-btn" onclick="addTaskRow(this)">+ Пункт</button>`;
+            createNode(cx, cy, 'task', 'Список задач', taskHtml);
+        } else {
+            createNode(cx, cy, 'text', 'Заметка', 'Текст...');
+        }
+    }
+
+    function openLinkModal() {
+        openModal({
+            title: 'Вставить ссылку', inputPlaceholder: 'https://...',
+            onConfirm: (url) => {
+                if(url) {
+                    const c = getWorldMousePosition();
+                    createNode(c.x - 125, c.y - 40, 'link', 'Ссылка', `<a href="${url}" target="_blank">${url}</a>`);
+                }
+            }
+        });
+    }
+
+    function openMediaModal(type) {
+        openModal({
+            title: type==='image'?'Добавить Картинку':'Добавить Видео',
+            extraHtml: `<button class="btn primary" onclick="triggerFile('${type}')" style="width:100%; padding:10px;">📂 Загрузить файл</button><div style="text-align:center; color:#666; margin:10px 0;">ИЛИ ссылка</div>`,
+            inputPlaceholder: 'https://...',
+            onConfirm: (url) => {
+                if(url) {
+                    const c = getWorldMousePosition();
+                    if(type==='image') createNode(c.x-200, c.y-100, 'image', 'Img', `<img src="${url}">`);
+                    else createVideoNode(c.x-200, c.y-100, url);
+                }
+            }
+        });
+    }
+
+    function confirmClearCanvas() {
+        openModal({
+            title: 'Очистить всё?', message: 'Это действие удалит все ноды в текущем пространстве.', confirmText: 'Удалить всё',
+            onConfirm: () => { recordAction(); nodes=[]; edges=[]; renderAll(); saveCurrentSpaceData(); }
+        });
+    }
+
+    function createNode(x, y, type, title, content) { addNodeData({ x, y, type, title, content }); renderAll(); }
+
+    // --- RENDER ---
+    function renderAll() {
+        document.querySelectorAll('.node').forEach(n => n.remove());
+        const defs = svgLayer.querySelector('defs');
+        svgLayer.innerHTML = '';
+        if(defs) svgLayer.appendChild(defs);
+        nodes.forEach(n => createNodeDOM(n));
+        edges.forEach(e => createEdgeDOM(e));
+    }
+
+    function createNodeDOM(node) {
+        const el = document.createElement('div');
+        el.id = node.id;
+        el.className = `node type-${node.type} color-${node.color} shape-${node.shape}`;
+        if(node.id === selectedNodeId) el.classList.add('selected');
+        el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; el.style.width = node.width + 'px';
+
+        let contentHtml = '';
+        if (['image','video'].includes(node.type)) {
+            contentHtml = `<div class="node-content ${node.type==='image'?'content-img':'content-video'}">${node.content}</div>`;
+        } else {
+            contentHtml = `<div class="node-content" ${node.type==='text'?'contenteditable="true"':''}>${node.content}</div>`;
+        }
+
+        el.innerHTML = `
+            <div class="node-header"><span class="header-text">${node.title}</span></div>
+            ${contentHtml}
+            <div class="resizer"></div>
+            <div class="handle h-top" data-side="top"></div>
+            <div class="handle h-right" data-side="right"></div>
+            <div class="handle h-bottom" data-side="bottom"></div>
+            <div class="handle h-left" data-side="left"></div>
+        `;
+        
+        const headerSpan = el.querySelector('.header-text');
+        headerSpan.addEventListener('dblclick', (e) => { e.stopPropagation(); headerSpan.contentEditable = true; headerSpan.focus(); document.execCommand('selectAll',false,null); });
+        headerSpan.addEventListener('blur', () => { headerSpan.contentEditable = false; if(node.title !== headerSpan.innerText) { node.title = headerSpan.innerText; saveCurrentSpaceData(); } });
+        headerSpan.addEventListener('keydown', e => { if(e.key==='Enter') headerSpan.blur(); });
+        if(node.type==='text') {
+            const cDiv = el.querySelector('.node-content');
+            cDiv.addEventListener('input', () => { node.content = cDiv.innerHTML; saveCurrentSpaceData(); });
+        }
+
+        world.appendChild(el);
+        attachEvents(el, node);
+    }
+
+    function attachEvents(el, node) {
+        // DRAG NODE
+        el.querySelector('.node-header').addEventListener('mousedown', (e) => {
+            if(e.target.isContentEditable) return;
+            e.stopPropagation(); selectNode(node);
+            const mouseWorld = getWorldMousePosition(e.clientX, e.clientY);
+            dragObj = { type: 'node', node, ix: node.x, iy: node.y, ox: mouseWorld.x - node.x, oy: mouseWorld.y - node.y };
+        });
+        // RESIZE
+        el.querySelector('.resizer').addEventListener('mousedown', (e) => {
+            e.stopPropagation(); dragObj = { type: 'resize', node, startX: e.clientX, startW: node.width };
+        });
+        // CONNECT
+        el.querySelectorAll('.handle').forEach(h => {
+            h.addEventListener('mousedown', (e) => {
+                e.stopPropagation(); connectStart = { id: node.id, side: h.dataset.side };
+                tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                tempLine.setAttribute('class', 'connection temp'); svgLayer.appendChild(tempLine);
+            });
+        });
+    }
+
+    // --- INTERACTION ---
+    window.addEventListener('mousedown', (e) => {
+        if(e.target.closest('#style-menu') || e.target.closest('.node') || e.target.closest('#modal-box') || e.target.closest('#sidebar')) return;
+        if(e.target === viewport || e.target === world) {
+            dragObj = { type: 'view', lx: e.clientX, ly: e.clientY };
+            viewport.style.cursor = 'grabbing'; deselectNode();
+        }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        mousePos.x = e.clientX; mousePos.y = e.clientY;
+        const worldPos = getWorldMousePosition(mousePos.x, mousePos.y);
+
+        if (!dragObj && !connectStart) return;
+
+        if (dragObj?.type === 'view') {
+            state.panX += mousePos.x - dragObj.lx; state.panY += mousePos.y - dragObj.ly;
+            dragObj.lx = mousePos.x; dragObj.ly = mousePos.y;
+            updateTransform(); updateStyleMenu();
+        } else if (dragObj?.type === 'node') {
+            const n = dragObj.node;
+            n.x = worldPos.x - dragObj.ox; n.y = worldPos.y - dragObj.oy;
+            const el = document.getElementById(n.id);
+            if(el) { el.style.left = n.x + 'px'; el.style.top = n.y + 'px'; }
+            updateConnectedEdges(n.id); updateStyleMenu();
+        } else if (dragObj?.type === 'resize') {
+            const n = dragObj.node;
+            const newW = Math.max(150, dragObj.startW + (mousePos.x - dragObj.startX) / state.scale);
+            n.width = newW;
+            const el = document.getElementById(n.id);
+            if(el) el.style.width = newW + 'px';
+            updateConnectedEdges(n.id); updateStyleMenu();
+        } else if (connectStart) {
+            const sn = nodes.find(n => n.id === connectStart.id);
+            const sp = getHandlePos(sn.id, connectStart.side);
+            drawCurve(tempLine, sp.x, sp.y, worldPos.x, worldPos.y, connectStart.side, null);
+        }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+        if(dragObj?.type === 'node' || dragObj?.type === 'resize') { recordAction(); saveCurrentSpaceData(); }
+        dragObj = null; viewport.style.cursor = 'grab';
+
+        if(connectStart) {
+            if(e.target.classList.contains('handle')) {
+                const tn = e.target.closest('.node');
+                if(tn.id !== connectStart.id) {
+                    recordAction();
+                    edges.push({ id:`e${Date.now()}`, from: connectStart.id, fSide: connectStart.side, to: tn.id, tSide: e.target.dataset.side });
+                    createEdgeDOM(edges[edges.length-1]);
+                    saveCurrentSpaceData();
+                }
+            }
+            if(tempLine) tempLine.remove();
+            tempLine = null; connectStart = null;
+        }
+    });
+
+    // --- CURVE MATH ---
+    function drawCurve(el, x1, y1, x2, y2, s1, s2) {
+        const sx=x1+SVG_OFFSET, sy=y1+SVG_OFFSET, ex=x2+SVG_OFFSET, ey=y2+SVG_OFFSET;
+        let c1x=sx, c1y=sy, c2x=ex, c2y=ey;
+        
+        if (!s2) {
+             const dist = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+             const off = Math.min(dist * 0.3, 100);
+             if(s1==='top') c1y-=off; else if(s1==='bottom') c1y+=off; else if(s1==='left') c1x-=off; else c1x+=off;
+        } else {
+             const dist = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+             const off = Math.min(dist * 0.5, 150);
+             if(s1==='top') c1y-=off; else if(s1==='bottom') c1y+=off; else if(s1==='left') c1x-=off; else c1x+=off;
+             if(s2==='top') c2y-=off; else if(s2==='bottom') c2y+=off; else if(s2==='left') c2x-=off; else c2x+=off;
+        }
+        el.setAttribute('d', `M ${sx} ${sy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey}`);
+    }
+
+    // --- PASTE CENTERED ---
+    window.addEventListener('paste', (e) => {
+        if(e.target.isContentEditable || e.target.tagName === 'INPUT') return;
+        e.preventDefault();
+        
+        const c = getWorldMousePosition();
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let item of items) {
+            if (item.kind === 'file') {
+                const blob = item.getAsFile();
+                handleFile(blob, item.type.includes('image') ? 'image' : 'video', {x: c.x - 200, y: c.y - 100});
+                return;
+            }
+        }
+        const text = e.clipboardData.getData('text');
+        if (text) {
+             if(text.match(/^http/)) createNode(c.x - 125, c.y - 40, 'link', 'Ссылка', `<a href="${text}" target="_blank">${text}</a>`);
+             else createNode(c.x - 125, c.y - 40, 'text', 'Заметка', text);
+        }
+    });
+
+    // --- HELPERS ---
+    function deleteSelectedNode() {
+        if(!selectedNodeId) return;
+        recordAction();
+        nodes = nodes.filter(n => n.id !== selectedNodeId);
+        edges = edges.filter(e => e.from !== selectedNodeId && e.to !== selectedNodeId);
+        deselectNode(); renderAll(); saveCurrentSpaceData();
+    }
+    window.addEventListener('keydown', (e) => {
+        if((e.key === 'Delete' || e.key === 'Backspace') && !e.target.isContentEditable && e.target.tagName !== 'INPUT') deleteSelectedNode();
+        if((e.ctrlKey||e.metaKey) && e.key==='z') undo();
+    });
+    function undo() {
+        if(!historyStack.length) return;
+        const d = JSON.parse(historyStack.pop()); nodes=d.nodes; edges=d.edges; idCounter=d.idCounter; deselectNode(); renderAll(); saveCurrentSpaceData();
+    }
+    function recordAction() { if(historyStack.length>40) historyStack.shift(); historyStack.push(JSON.stringify({nodes, edges, idCounter})); }
+    
+    function createEdgeDOM(edge) {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.id = edge.id; path.setAttribute('class', 'connection');
+        path.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); 
+            openModal({title:'Удалить связь?', confirmText:'Да', onConfirm:()=>{
+                recordAction(); edges = edges.filter(x=>x.id!==edge.id); path.remove(); saveCurrentSpaceData();
+            }});
+        });
+        svgLayer.appendChild(path); updateEdgePath(edge);
+    }
+    function updateConnectedEdges(nid) { edges.forEach(e => { if(e.from===nid || e.to===nid) updateEdgePath(e); }); }
+    function updateEdgePath(e) {
+        const el = document.getElementById(e.id);
+        if(el) {
+            const p1 = getHandlePos(e.from, e.fSide);
+            const p2 = getHandlePos(e.to, e.tSide);
+            drawCurve(el, p1.x, p1.y, p2.x, p2.y, e.fSide, e.tSide);
+        }
+    }
+    function getHandlePos(nid, side) {
+        const el = document.getElementById(nid);
+        if(!el) return {x:0,y:0};
+        const x = parseFloat(el.style.left), y = parseFloat(el.style.top);
+        const w = el.offsetWidth, h = el.offsetHeight;
+        if(side==='top') return {x:x+w/2, y};
+        if(side==='right') return {x:x+w, y:y+h/2};
+        if(side==='bottom') return {x:x+w/2, y:y+h};
+        if(side==='left') return {x, y:y+h/2};
+        return {x,y};
+    }
+    
+    window.toggleTask = function(btn) { btn.parentElement.classList.toggle('done'); saveNodeState(btn); };
+    window.addTaskRow = function(btn) {
+        const row = document.createElement('div'); row.className = 'task-row';
+        row.innerHTML = `<div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" value="" oninput="saveNodeState(this)"><input type="date" class="task-date" onchange="saveNodeState(this)">`;
+        btn.before(row); row.querySelector('.task-input').focus(); saveNodeState(btn);
+    };
+    window.saveNodeState = function(el) {
+        const nEl = el.closest('.node');
+        if(nEl) {
+            const node = nodes.find(n => n.id === nEl.id);
+            const contentEl = nEl.querySelector('.node-content');
+            contentEl.querySelectorAll('input').forEach(i => i.setAttribute('value', i.value));
+            if(node) { node.content = contentEl.innerHTML; saveCurrentSpaceData(); }
+        }
+    }
+    function triggerFile(type) { closeModal(); fileInput.setAttribute('accept', type==='image'?'image/*':'video/*'); fileInput.click(); fileInput.onchange = e => { const f=e.target.files[0]; if(f) handleFile(f,type); fileInput.value=''; }; }
+    function handleFile(f, t, c) { if(!c) c=getWorldMousePosition(window.innerWidth/2+100, window.innerHeight/2); const r = new FileReader(); r.onload = e => createNode(c.x, c.y, t, t==='image'?'Img':'Video', t==='image'?`<img src="${e.target.result}">`:`<video src="${e.target.result}" controls></video>`); r.readAsDataURL(f); }
+    function createVideoNode(x, y, url) { const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/); const c = yt ? `<iframe src="https://www.youtube.com/embed/${yt[1]}" allowfullscreen></iframe>` : `<video src="${url}" controls></video>`; createNode(x, y, 'video', 'Video', c); }
+    function selectNode(node) { selectedNodeId = node.id; document.querySelectorAll('.node').forEach(n => n.classList.remove('selected')); document.getElementById(node.id)?.classList.add('selected'); updateStyleMenu(); }
+    function deselectNode() { selectedNodeId = null; document.querySelectorAll('.node').forEach(n => n.classList.remove('selected')); styleMenu.style.display = 'none'; }
+    function updateStyleMenu() {
+        if(!selectedNodeId) { styleMenu.style.display = 'none'; return; }
+        const node = nodes.find(n => n.id === selectedNodeId); if(!node) return;
+        const el = document.getElementById(node.id);
+        if(el) {
+             const rect = el.getBoundingClientRect();
+             styleMenu.style.display = 'flex'; 
+             styleMenu.style.left = (rect.left + rect.width/2) + 'px'; 
+             styleMenu.style.top = (rect.top - 40) + 'px';
+        }
+    }
+    function applyStyle(prop, val) { if(selectedNodeId) { const n = nodes.find(x => x.id === selectedNodeId); recordAction(); n[prop] = val; renderAll(); selectNode(n); saveCurrentSpaceData(); } }
+    function updateTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; world.style.backgroundPosition = `${-state.panX/state.scale}px ${-state.panY/state.scale}px`; }
+    viewport.addEventListener('wheel', (e) => { e.preventDefault(); const d = e.deltaY > 0 ? 0.9 : 1.1; state.scale = Math.min(Math.max(0.1, state.scale * d), 5); updateTransform(); updateStyleMenu(); }, {passive:false});
+
+    init();
+</script>
+</body>
+</html>
