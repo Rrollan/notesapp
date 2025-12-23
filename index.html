@@ -3,323 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquid Canvas: Light</title>
+    <title>Real Liquid Glass</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* --- Цвета Light Theme --- */
-            --bg-color: #F5F5F7; /* Классический фон Apple */
-            --text-primary: #1d1d1f;
-            --text-secondary: rgba(60, 60, 67, 0.6);
-            
-            /* --- GLASSPHORISM (СЕКРЕТ КРАСОТЫ) --- */
-            /* Белое матовое стекло */
-            --glass-bg: rgba(255, 255, 255, 0.65); 
-            /* Сильное размытие + Насыщенность (делает цвета под стеклом сочнее) */
-            --glass-filter: blur(25px) saturate(180%);
-            /* Белая обводка (блик) */
-            --glass-border: rgba(255, 255, 255, 0.8);
-            /* Внутреннее свечение для объема */
-            --glass-shadow: 
-                0 10px 40px rgba(0, 0, 0, 0.05),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.6); 
-
-            /* UI Colors */
+            --text-primary: #000000;
+            --text-secondary: rgba(0, 0, 0, 0.6);
             --accent: #007AFF;
-            --accent-green: #34C759;
-            --accent-red: #FF3B30;
-            --sidebar-width: 280px;
+            
+            /* --- НАСТРОЙКИ СТЕКЛА (VISION OS STYLE) --- */
+            /* Прозрачность ниже, размытие выше */
+            --glass-bg: rgba(255, 255, 255, 0.45); 
+            --glass-blur: blur(40px) saturate(150%);
+            /* Граница: белая, полупрозрачная */
+            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+            /* Тени: внешняя мягкая + внутренняя белая (блик) */
+            --glass-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 0 0 20px rgba(255, 255, 255, 0.2); 
+            
+            --radius-l: 32px;
+            --radius-m: 20px;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-            background-color: var(--bg-color);
+            /* Базовый фон не чисто белый, а чуть серый, чтобы стекло выделялось */
+            background-color: #f2f2f7; 
             font-family: 'Inter', sans-serif;
             color: var(--text-primary);
-            user-select: none;
-            -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 1. ФОН (LIQUID MESH) --- */
-        /* Делаем его нежным и пастельным */
+        /* --- 1. ЯРКИЙ ЖИВОЙ ФОН --- */
         .mesh-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
-            background: #ffffff;
             overflow: hidden;
+            background: #fff; /* Подложка */
         }
-        .mesh-blob {
-            position: absolute; border-radius: 50%;
-            filter: blur(80px); /* Сильное размытие краев */
+        
+        /* ГРАДИЕНТНЫЕ ПЯТНА (ярче, чтобы пробивать стекло) */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px); /* Сильное размытие */
             opacity: 0.8;
             will-change: transform;
-            mix-blend-mode: multiply; /* Смешивание цветов как акварель */
+            animation: float 20s infinite ease-in-out alternate;
         }
-        /* Пастельные тона */
-        .b1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #E0F7FA; animation: float 25s infinite alternate; } /* Soft Cyan */
-        .b2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #E1BEE7; animation: float 30s infinite alternate; } /* Soft Purple */
-        .b3 { top: 30%; left: 30%; width: 45vw; height: 45vw; background: #FFF9C4; animation: float 22s infinite alternate; } /* Soft Yellow */
-        .b4 { bottom: 0%; left: 10%; width: 40vw; height: 40vw; background: #FFCCBC; animation: float 28s infinite alternate; } /* Soft Orange */
+        
+        /* Цвета как в заставках iOS */
+        .b1 { 
+            top: -10%; left: -10%; width: 60vw; height: 60vw; 
+            background: radial-gradient(circle, #a18cd1 0%, #fbc2eb 100%); /* Purple-Pink */
+            animation-duration: 25s;
+        } 
+        .b2 { 
+            bottom: -10%; right: -10%; width: 50vw; height: 50vw; 
+            background: radial-gradient(circle, #8fd3f4 0%, #84fab0 100%); /* Blue-Green */
+            animation-duration: 30s; 
+            animation-direction: alternate-reverse;
+        } 
+        .b3 { 
+            top: 40%; left: 40%; width: 40vw; height: 40vw; 
+            background: radial-gradient(circle, #f6d365 0%, #fda085 100%); /* Orange-Yellow */
+            opacity: 0.6;
+            animation-duration: 22s;
+        } 
 
         @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(40px, 40px) scale(1.05); }
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(30px, 20px) scale(1.1) rotate(10deg); }
+            100% { transform: translate(-20px, 40px) scale(0.95) rotate(-5deg); }
         }
 
-        /* --- 2. СТЕКЛЯННЫЕ ПАНЕЛИ --- */
+        /* --- 2. СТЕКЛЯННЫЙ КЛАСС --- */
         .glass-panel {
             background: var(--glass-bg);
-            backdrop-filter: var(--glass-filter);
-            -webkit-backdrop-filter: var(--glass-filter);
-            border: 1px solid var(--glass-border);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur); /* Для Safari */
+            border: var(--glass-border);
             box-shadow: var(--glass-shadow);
-            border-radius: 24px;
+            border-radius: var(--radius-l);
         }
 
         /* --- SIDEBAR --- */
         #sidebar {
             position: fixed; top: 20px; left: 20px; bottom: 20px;
-            width: var(--sidebar-width); 
+            width: 260px;
             z-index: 2000;
             display: flex; flex-direction: column;
-            transition: 0.3s;
+            transition: 0.2s;
         }
         
         .sidebar-header {
-            padding: 24px 20px; font-weight: 700; font-size: 1.3rem;
-            color: #000; letter-spacing: -0.02em;
+            padding: 30px 24px 10px; font-weight: 800; font-size: 1.5rem; letter-spacing: -1px;
+            background: linear-gradient(45deg, #333, #000); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .sidebar-hint {
-            font-size: 0.8rem; color: var(--text-secondary); padding: 0 20px 20px; 
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        .space-list { flex-grow: 1; overflow-y: auto; padding: 15px; }
-
+        .sidebar-hint { font-size: 0.75rem; color: var(--text-secondary); padding: 0 24px 20px; }
+        
+        .space-list { flex-grow: 1; padding: 10px 15px; overflow-y: auto; }
         .space-item {
-            padding: 10px 14px; margin-bottom: 6px; border-radius: 12px; cursor: pointer;
-            display: flex; justify-content: space-between; align-items: center;
-            color: #555; transition: 0.2s; font-weight: 500; font-size: 0.95rem;
+            padding: 12px 16px; margin-bottom: 8px; border-radius: 16px; 
+            cursor: pointer; display: flex; justify-content: space-between; 
+            font-weight: 500; transition: 0.2s; color: #444;
         }
-        .space-item:hover { background: rgba(0,0,0,0.04); color: #000; }
+        .space-item:hover { background: rgba(255,255,255,0.4); color: #000; }
         .space-item.active { 
-            background: #fff; color: var(--accent); 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Карточка внутри стекла */
+            background: rgba(255,255,255,0.7); color: #000; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-weight: 600;
         }
-        .space-del { opacity: 0; color: var(--accent-red); padding: 2px 6px; font-weight: bold;}
-        .space-item:hover .space-del { opacity: 1; }
-
+        
         .add-space-btn {
-            background: rgba(255,255,255,0.4); border: 1px dashed rgba(0,0,0,0.15); 
-            color: var(--text-secondary); margin: 10px 20px 20px; padding: 12px; border-radius: 14px; 
-            cursor: pointer; transition: 0.2s; font-weight: 600; font-size: 0.9rem;
+            margin: 10px 20px 20px; padding: 14px; border-radius: 16px;
+            background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.5);
+            color: var(--accent); font-weight: 600; cursor: pointer; transition: 0.2s;
         }
-        .add-space-btn:hover { border-color: var(--accent); color: var(--accent); background: #fff; }
+        .add-space-btn:hover { background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
 
-        .backup-section {
-            border-top: 1px solid rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; gap: 10px;
-        }
+        .backup-section { padding: 20px; display: flex; flex-direction: column; gap: 8px; }
         .backup-btn {
-            background: #fff; color: #333; border: none; padding: 10px;
-            border-radius: 12px; cursor: pointer; font-size: 0.85rem; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; font-weight: 500;
+            background: transparent; border: 1px solid rgba(0,0,0,0.1); padding: 10px;
+            border-radius: 12px; cursor: pointer; font-size: 0.8rem; font-weight: 500;
         }
-        .backup-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .backup-btn.restore { color: var(--accent); }
+        .backup-btn:hover { background: rgba(255,255,255,0.5); }
 
-        /* --- TOOLBAR --- */
+        /* --- TOOLBAR (FLOATING ISLAND) --- */
         #ui-layer {
-            position: fixed; top: 20px; left: calc(var(--sidebar-width) + 40px); z-index: 1000;
-            display: flex; gap: 12px; flex-direction: column; pointer-events: none;
+            position: fixed; top: 20px; left: 300px; z-index: 1000;
+            display: flex; gap: 15px; pointer-events: none;
         }
         .toolbar {
-            /* Еще более "ледяной" тулбар */
-            background: rgba(255, 255, 255, 0.75); 
-            backdrop-filter: blur(30px) saturate(200%);
-            padding: 6px 8px; border-radius: 18px; 
-            border: 1px solid rgba(255,255,255,0.9);
-            display: flex; gap: 6px; flex-wrap: wrap; 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.08); pointer-events: auto;
+            /* Остров */
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(30px);
+            padding: 8px; border-radius: 50px; /* Полностью круглый */
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            display: flex; gap: 5px; pointer-events: auto;
         }
         .btn {
-            background: transparent; border: none; color: #444; padding: 8px 16px;
-            border-radius: 10px; cursor: pointer; font-size: 0.9rem; transition: 0.2s; font-weight: 500;
+            background: transparent; border: none; padding: 10px 20px;
+            border-radius: 40px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+            color: #333; transition: 0.2s;
         }
-        .btn:hover { background: rgba(0,0,0,0.05); color: #000; }
-        .btn.primary { background: #fff; color: #000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .btn.danger { color: var(--accent-red); }
+        .btn:hover { background: rgba(0,0,0,0.05); }
+        .btn.primary { background: #000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .btn.primary:hover { transform: scale(1.05); }
+        .btn.danger { color: #ff3b30; }
+        .btn.danger:hover { background: rgba(255, 59, 48, 0.1); }
 
         /* --- CANVAS --- */
-        #viewport { position: absolute; top:0; left: 0; width: 100%; height: 100%; cursor: grab; overflow: hidden; }
+        #viewport { position: absolute; width: 100%; height: 100%; overflow: hidden; cursor: grab; }
         #viewport:active { cursor: grabbing; }
-        #world { position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform; }
+        #world { position: absolute; transform-origin: 0 0; }
+        #connections-layer { position: absolute; pointer-events: none; top: -50000px; left: -50000px; }
+        path.connection { fill: none; stroke: rgba(0,0,0,0.2); stroke-width: 2px; transition: 0.2s; }
+        path.connection:hover { stroke: var(--accent); stroke-width: 3px; cursor: pointer; }
 
-        /* Связи - теперь мягкие серые */
-        #connections-layer {
-            position: absolute; top: -50000px; left: -50000px;
-            width: 100000px; height: 100000px; pointer-events: none; z-index: 0;
-        }
-        path.connection {
-            fill: none; stroke: #C7C7CC; stroke-width: 2px;
-            pointer-events: stroke; transition: stroke 0.2s; stroke-linecap: round;
-        }
-        path.connection:hover { stroke: var(--accent); stroke-width: 4px; cursor: pointer; }
-        marker path { fill: #C7C7CC; }
-
-        /* --- NODES (КАРТОЧКИ) --- */
+        /* --- NODES (VISION PRO CARDS) --- */
         .node {
-            position: absolute; min-width: 240px;
-            /* Самый сок Liquid Glass для светлой темы */
-            background: rgba(255, 255, 255, 0.65); /* Полупрозрачный белый */
-            backdrop-filter: blur(20px) saturate(180%); /* Apple style */
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            
-            border: 1px solid rgba(255, 255, 255, 0.9); /* Четкая белая граница */
-            border-radius: 20px;
-            
-            /* Мягкая тень, а не черная дыра */
-            box-shadow: 
-                0 10px 40px -10px rgba(0,0,0,0.1),
-                0 0 0 1px rgba(255,255,255,0.5) inset; /* Внутренний блик */
-                
+            position: absolute; min-width: 260px;
+            /* Стекло для карточек */
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8);
+            border-radius: var(--radius-m);
             display: flex; flex-direction: column; z-index: 1; 
-            transition: box-shadow 0.2s, transform 0.1s;
-            color: #000;
+            transition: transform 0.1s, box-shadow 0.2s;
         }
-        
         .node:hover { 
-            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.8) inset;
-            z-index: 5; 
+            box-shadow: 0 30px 60px -10px rgba(0,0,0,0.2), inset 0 1px 0 #fff; 
+            z-index: 10;
         }
-        .node.selected { 
-            border: 2px solid var(--accent) !important; 
-            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15); 
-            z-index: 10; 
+        .node.selected {
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.2);
         }
-        
-        /* Цветные теги (нежный фон) */
-        .node.color-red .node-header { background: rgba(255, 59, 48, 0.1); color: #D70015; }
-        .node.color-green .node-header { background: rgba(52, 199, 89, 0.1); color: #248A3D; }
-        .node.color-blue .node-header { background: rgba(0, 122, 255, 0.1); color: #0040DD; }
-        .node.color-yellow .node-header { background: rgba(255, 204, 0, 0.15); color: #A36500; }
-        
-        .node.shape-round { border-radius: 36px; }
-        .node.shape-round .node-header { border-radius: 36px 36px 0 0; padding: 18px 24px; }
-        .node.shape-round .content-img, .node.shape-round .content-video { border-radius: 0 0 36px 36px; }
 
         .node-header {
-            padding: 14px 20px; font-weight: 600; font-size: 0.95rem;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            border-radius: 20px 20px 0 0; cursor: grab;
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.4);
+            padding: 16px 20px; font-weight: 600;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            background: rgba(255,255,255,0.2); /* Легкое выделение шапки */
+            border-radius: var(--radius-m) var(--radius-m) 0 0;
+            cursor: grab; display: flex; justify-content: space-between;
         }
-        .header-text { outline: none; border-bottom: 1px solid transparent; max-width: 85%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-        .header-text:focus { border-bottom: 1px solid var(--accent); }
+        .header-text { outline: none; border-bottom: 1px solid transparent; }
+        .header-text:focus { border-color: var(--accent); }
 
         .node-content {
-            padding: 18px; font-size: 1rem; line-height: 1.5; outline: none;
-            color: #1d1d1f; word-break: break-word; cursor: text; flex-grow: 1;
+            padding: 20px; font-size: 1rem; line-height: 1.5; outline: none; flex-grow: 1; cursor: text;
         }
-        .node-content a { color: var(--accent); text-decoration: none; font-weight: 500;}
         
-        .content-img, .content-video { padding: 0; display: flex; justify-content: center; background: #f2f2f7; border-radius: 0 0 20px 20px; overflow: hidden; }
-        .content-img img { width: 100%; height: auto; display: block; pointer-events: none; }
-        .content-video iframe, .content-video video { width: 100%; height: 100%; min-height: 200px; border: none; }
+        .content-img { padding: 0; overflow: hidden; border-radius: 0 0 var(--radius-m) var(--radius-m); background: rgba(0,0,0,0.03); }
+        .content-img img { width: 100%; display: block; pointer-events: none; }
         
-        /* Resize handle */
-        .resizer { position: absolute; right: 0; bottom: 0; width: 20px; height: 20px; cursor: se-resize; opacity: 0; transition: 0.2s;}
-        .resizer::after { content: ''; position: absolute; right: 6px; bottom: 6px; width: 8px; height: 8px; border-right: 2px solid #ccc; border-bottom: 2px solid #ccc; border-radius: 2px; }
+        /* HANDLES & RESIZERS */
+        .resizer { position: absolute; right: 0; bottom: 0; width: 25px; height: 25px; cursor: se-resize; opacity: 0; }
+        .resizer::after { content: ''; position: absolute; right: 8px; bottom: 8px; width: 6px; height: 6px; border-right: 2px solid #aaa; border-bottom: 2px solid #aaa; border-radius: 1px; }
         .node:hover .resizer { opacity: 1; }
 
-        /* Tasks */
-        .task-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; padding: 6px; border-radius: 8px; transition: 0.2s; }
-        .task-row:hover { background: rgba(0,0,0,0.03); }
-        .task-check { width: 18px; height: 18px; min-width: 18px; border: 2px solid #C7C7CC; border-radius: 6px; cursor: pointer; position: relative; margin-top: 3px; background: #fff;}
-        .task-input { background: transparent; border: none; color: #1d1d1f; font-size: 1rem; width: 100%; outline: none; font-family: 'Inter', sans-serif;}
-        .task-date { background: rgba(0,0,0,0.05); border: none; color: #888; font-size: 0.75rem; padding: 3px 6px; border-radius: 6px; cursor: pointer; }
-        .task-row.done { opacity: 0.5; }
-        .task-row.done .task-check { background: var(--accent-green); border-color: var(--accent-green); box-shadow: 0 2px 5px rgba(52, 199, 89, 0.3);}
-        .task-row.done .task-input { text-decoration: line-through; }
-        .add-task-btn { width: 100%; padding: 10px; background: rgba(255,255,255,0.5); border: 1px dashed #ccc; color: #888; border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 0.85rem;}
-        .add-task-btn:hover { border-color: var(--accent); color: var(--accent); background: #fff; }
-
-        /* Handles */
         .handle {
-            position: absolute; width: 20px; height: 20px; background: transparent; cursor: crosshair; z-index: 20;
-            display: flex; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s;
+            position: absolute; width: 16px; height: 16px; background: #fff; border: 2px solid #ccc;
+            border-radius: 50%; z-index: 20; opacity: 0; cursor: crosshair; transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .handle::after { 
-            content: ''; width: 10px; height: 10px; background: #fff; border-radius: 50%; 
-            border: 2px solid var(--accent); box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s;
-        }
-        .node:hover .handle, .handle.snap-active { opacity: 1; }
-        .handle:hover::after { transform: scale(1.3); background: var(--accent); border-color: #fff;}
-        
-        .h-top { top: -10px; left: 50%; transform: translateX(-50%); }
-        .h-right { right: -10px; top: 50%; transform: translateY(-50%); }
-        .h-bottom { bottom: -10px; left: 50%; transform: translateX(-50%); }
-        .h-left { left: -10px; top: 50%; transform: translateY(-50%); }
+        .node:hover .handle { opacity: 1; }
+        .handle:hover { transform: scale(1.3); border-color: var(--accent); background: var(--accent); }
+        .h-top { top: -8px; left: 50%; transform: translateX(-50%); }
+        .h-right { right: -8px; top: 50%; transform: translateY(-50%); }
+        .h-bottom { bottom: -8px; left: 50%; transform: translateX(-50%); }
+        .h-left { left: -8px; top: 50%; transform: translateY(-50%); }
 
-        /* Menu */
+        /* --- STYLES MENU --- */
         #style-menu {
-            position: absolute; display: none; z-index: 2000; 
-            background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
-            padding: 8px; border-radius: 50px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.8); 
-            gap: 8px; align-items: center; pointer-events: auto; transform: translate(-50%, -130%);
+            position: absolute; display: none; z-index: 2000;
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(20px);
+            padding: 8px 12px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); gap: 10px; transform: translate(-50%, -140%);
         }
-        .color-btn { width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
-        .color-btn:hover { transform: scale(1.2); }
+        .color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; transition: 0.2s; border: 2px solid transparent;}
+        .color-dot:hover { transform: scale(1.2); border-color: rgba(0,0,0,0.2); }
 
-        /* Modal */
+        /* --- MODAL --- */
         #modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.6); backdrop-filter: blur(8px);
-            z-index: 5000; display: none; justify-content: center; align-items: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5000;
+            background: rgba(255,255,255,0.4); backdrop-filter: blur(10px);
+            display: none; justify-content: center; align-items: center;
         }
         #modal-box {
-            background: #fff; width: 340px; padding: 30px;
-            border-radius: 28px; border: 1px solid rgba(0,0,0,0.05); 
-            box-shadow: 0 25px 60px rgba(0,0,0,0.15);
-            display: flex; flex-direction: column; gap: 15px;
-            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: #fff; padding: 30px; border-radius: 30px; width: 350px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.2); border: 1px solid #eee;
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
-        #modal-title { margin: 0; color: #000; font-size: 1.25rem; font-weight: 700; text-align: center;}
-        #modal-message { font-size: 0.95rem; color: #666; line-height: 1.4; text-align: center;}
-        .modal-input {
-            background: #F5F5F7; border: 1px solid transparent; color: #333;
-            padding: 12px; border-radius: 12px; outline: none; width: 100%; box-sizing: border-box; font-size: 1rem; transition: 0.2s;
-        }
-        .modal-input:focus { background: #fff; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1); }
-        .modal-actions { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+        @keyframes pop { from{transform:scale(0.8); opacity:0} to{transform:scale(1); opacity:1}}
+        .modal-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 12px; margin-top: 10px; font-size: 1rem; outline: none; box-sizing: border-box;}
+        .modal-input:focus { border-color: var(--accent); }
+        .modal-btns { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         
         #hidden-file-input, #backup-file-input { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- LIGHT LIQUID BACKGROUND -->
+    <!-- 1. ФОН: ГРАДИЕНТНЫЕ ПЯТНА -->
     <div class="mesh-bg">
-        <div class="mesh-blob b1"></div>
-        <div class="mesh-blob b2"></div>
-        <div class="mesh-blob b3"></div>
-        <div class="mesh-blob b4"></div>
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
     </div>
 
-    <input type="file" id="hidden-file-input" multiple>
+    <input type="file" id="hidden-file-input">
     <input type="file" id="backup-file-input" accept=".json">
 
     <!-- SIDEBAR -->
     <div id="sidebar" class="glass-panel">
-        <div class="sidebar-header">Liquid Light</div>
-        <div class="sidebar-hint">DblClick для переименования</div>
+        <div class="sidebar-header">Glass Space</div>
+        <div class="sidebar-hint">Double click to rename</div>
         <div class="space-list" id="space-list"></div>
         <button class="add-space-btn" onclick="openCreateSpaceModal()">+ New Space</button>
-        
         <div class="backup-section">
-            <button class="backup-btn" onclick="downloadBackup()">↓ Backup</button>
-            <button class="backup-btn restore" onclick="triggerRestore()">↑ Restore</button>
+            <button class="backup-btn" onclick="downloadBackup()">↓ Save Backup</button>
+            <button class="backup-btn" onclick="triggerRestore()">↑ Restore</button>
         </div>
     </div>
 
@@ -330,390 +276,275 @@
             <button class="btn" onclick="openMediaModal('image')">Image</button>
             <button class="btn" onclick="openMediaModal('video')">Video</button>
             <button class="btn" onclick="spawnNode('task')">Tasks</button>
-            <button class="btn" onclick="openLinkModal()">Link</button>
-        </div>
-        <div class="toolbar">
+            <div style="width:1px; background:rgba(0,0,0,0.1); margin: 0 5px;"></div>
             <button class="btn danger" onclick="confirmClearCanvas()">Clear</button>
         </div>
     </div>
 
-    <!-- STYLE MENU -->
+    <!-- CONTEXT MENU -->
     <div id="style-menu">
-        <div class="color-btn" style="background:#F5F5F7;" onclick="applyStyle('color', 'default')"></div>
-        <div class="color-btn" style="background:#FF3B30;" onclick="applyStyle('color', 'red')"></div>
-        <div class="color-btn" style="background:#34C759;" onclick="applyStyle('color', 'green')"></div>
-        <div class="color-btn" style="background:#007AFF;" onclick="applyStyle('color', 'blue')"></div>
-        <div class="color-btn" style="background:#FFCC00;" onclick="applyStyle('color', 'yellow')"></div>
-        <div style="width: 1px; height: 15px; background: #ddd; margin: 0 4px;"></div>
-        <button class="btn" style="padding: 2px 8px; font-size: 11px;" onclick="applyStyle('shape', 'default')">Rect</button>
-        <button class="btn" style="padding: 2px 8px; font-size: 11px;" onclick="applyStyle('shape', 'round')">Round</button>
-        <div style="width: 1px; height: 15px; background: #ddd; margin: 0 4px;"></div>
-        <button class="btn danger" style="padding: 2px 6px; font-size: 14px; font-weight:bold;" onclick="deleteSelectedNode()">✕</button>
+        <div class="color-dot" style="background:#fff; border:1px solid #ddd;" onclick="applyStyle('color', 'default')"></div>
+        <div class="color-dot" style="background:#FF3B30;" onclick="applyStyle('color', 'red')"></div>
+        <div class="color-dot" style="background:#34C759;" onclick="applyStyle('color', 'green')"></div>
+        <div class="color-dot" style="background:#007AFF;" onclick="applyStyle('color', 'blue')"></div>
+        <div class="color-dot" style="background:#FFCC00;" onclick="applyStyle('color', 'yellow')"></div>
+        <button class="btn" style="padding: 5px 10px; font-size: 12px;" onclick="deleteSelectedNode()">Delete</button>
     </div>
 
     <!-- MODAL -->
     <div id="modal-overlay">
         <div id="modal-box">
-            <h3 id="modal-title">Title</h3>
-            <div id="modal-message" style="display:none;"></div>
+            <h2 id="modal-title" style="margin:0;">Title</h2>
             <div id="modal-body"></div>
-            <div class="modal-actions">
+            <div class="modal-btns">
                 <button class="btn" onclick="closeModal()">Cancel</button>
-                <button id="modal-confirm-btn" class="btn primary">OK</button>
+                <button class="btn primary" id="modal-confirm">Confirm</button>
             </div>
         </div>
     </div>
 
     <div id="viewport">
         <div id="world">
-            <svg id="connections-layer" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <marker id="arrowhead" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                      <path d="M 0 0 L 10 5 L 0 10 z" fill="#C7C7CC" />
-                    </marker>
-                </defs>
+            <svg id="connections-layer" width="100000" height="100000" xmlns="http://www.w3.org/2000/svg">
+                <defs><marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#aaa"/></marker></defs>
             </svg>
         </div>
     </div>
 
 <script>
-    // --- ПАРАЛЛАКС ДЛЯ ВАЙБА ---
+    // --- ПАРАЛЛАКС ДЛЯ ВАУ-ЭФФЕКТА ---
     document.addEventListener('mousemove', (e) => {
-        const xP = (e.clientX / window.innerWidth - 0.5);
-        const yP = (e.clientY / window.innerHeight - 0.5);
-        document.querySelectorAll('.mesh-blob').forEach((b, i) => {
-            b.style.transform = `translate(${xP * (i+1) * 30}px, ${yP * (i+1) * 30}px)`;
+        const x = (e.clientX / window.innerWidth - 0.5) * 50;
+        const y = (e.clientY / window.innerHeight - 0.5) * 50;
+        document.querySelectorAll('.blob').forEach((b, i) => {
+            const speed = i + 1;
+            b.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
         });
     });
 
-    // --- ЛОГИКА (Та же самая, но с подправленными дефолтами) ---
+    // --- LOGIC (Simplified for stability) ---
     let spaces = JSON.parse(localStorage.getItem('ob_spaces')) || ['Main'];
     let currentSpace = localStorage.getItem('ob_currentSpace') || 'Main';
-    const SVG_OFFSET = 50000;
+    let nodes = [], edges = [];
+    let state = { x: 0, y: 0, scale: 1 };
+    let idCounter = 1;
+    let selectedId = null;
+    let drag = null;
+    let connStart = null;
+    let tempLine = null;
 
     const viewport = document.getElementById('viewport');
     const world = document.getElementById('world');
-    const svgLayer = document.getElementById('connections-layer');
-    const fileInput = document.getElementById('hidden-file-input');
-    const backupInput = document.getElementById('backup-file-input');
-    const styleMenu = document.getElementById('style-menu');
-    
-    // Modal
-    const modal = document.getElementById('modal-overlay');
-    const modalTitle = document.getElementById('modal-title');
-    const modalMsg = document.getElementById('modal-message');
-    const modalBody = document.getElementById('modal-body');
-    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
-
-    let state = { scale: 1, panX: window.innerWidth/2, panY: window.innerHeight/2 };
-    let nodes = [];
-    let edges = [];
-    let idCounter = 1;
-    let historyStack = [];
-    let selectedNodeId = null;
-
-    let dragObj = null; 
-    let connectStart = null; 
-    let tempLine = null;
-    let mousePos = { x: 0, y: 0 }; 
+    const svg = document.getElementById('connections-layer');
 
     function init() {
-        renderSpacesSidebar();
-        loadSpaceData(currentSpace);
-        window.addEventListener('beforeunload', saveCurrentSpaceData);
+        loadSpace(currentSpace);
+        renderSpaces();
         updateTransform();
     }
 
-    // --- ФУНКЦИИ ---
-    function getWorldMousePosition(screenX, screenY) {
-        const sx = screenX !== undefined ? screenX : mousePos.x;
-        const sy = screenY !== undefined ? screenY : mousePos.y;
-        const rect = viewport.getBoundingClientRect();
-        return {
-            x: (sx - rect.left - state.panX) / state.scale,
-            y: (sy - rect.top - state.panY) / state.scale
-        };
-    }
-
-    function renderSpacesSidebar() {
-        const list = document.getElementById('space-list');
-        list.innerHTML = '';
-        spaces.forEach(name => {
-            const div = document.createElement('div');
-            div.className = `space-item ${name === currentSpace ? 'active' : ''}`;
-            div.innerHTML = `<span class="space-item-name">${name}</span>${spaces.length > 1 ? `<span class="space-del">✕</span>` : ''}`;
-            div.onclick = (e) => { if(e.target.classList.contains('space-del')) confirmDeleteSpace(name); else switchSpace(name); };
-            div.ondblclick = (e) => { if(!e.target.classList.contains('space-del')) openRenameSpaceModal(name); };
-            list.appendChild(div);
+    function renderSpaces() {
+        const l = document.getElementById('space-list'); l.innerHTML = '';
+        spaces.forEach(s => {
+            const d = document.createElement('div');
+            d.className = `space-item ${s===currentSpace?'active':''}`;
+            d.innerText = s;
+            d.onclick = () => { if(s!==currentSpace) { saveSpace(); currentSpace=s; localStorage.setItem('ob_currentSpace', s); loadSpace(s); renderSpaces(); }};
+            l.appendChild(d);
         });
     }
 
-    function switchSpace(name) {
-        if(name === currentSpace) return;
-        saveCurrentSpaceData(); currentSpace = name; localStorage.setItem('ob_currentSpace', name); loadSpaceData(name); renderSpacesSidebar();
-    }
-
-    function saveCurrentSpaceData() {
-        localStorage.setItem(`ob_space_${currentSpace}`, JSON.stringify({ nodes, edges, idCounter, state }));
-    }
-
-    function loadSpaceData(name) {
-        const raw = localStorage.getItem(`ob_space_${name}`);
-        if(raw) {
-            const data = JSON.parse(raw);
-            nodes = data.nodes || []; edges = data.edges || []; idCounter = data.idCounter || 1;
-        } else {
-            nodes = []; edges = []; idCounter = 1;
-            addNodeData({ x: 50, y: 50, type: 'text', title: 'Start', content: 'Привет! Это Liquid Canvas Light.' });
-        }
-        historyStack = []; deselectNode(); renderAll(); updateTransform();
-    }
-
-    function addNodeData(data) {
-        recordAction();
-        const id = data.id || ('node-' + idCounter++);
-        const w = data.width || (['video','image'].includes(data.type) ? 320 : 260);
-        const newNode = { ...data, id, width: w, color: data.color||'default', shape: data.shape||'default' };
-        nodes.push(newNode); saveCurrentSpaceData(); return newNode;
+    function saveSpace() { localStorage.setItem('ob_'+currentSpace, JSON.stringify({nodes, edges, idCounter, state})); }
+    function loadSpace(n) {
+        const d = JSON.parse(localStorage.getItem('ob_'+n));
+        if(d) { nodes=d.nodes; edges=d.edges; idCounter=d.idCounter; state=d.state||{x:0,y:0,scale:1}; }
+        else { nodes=[]; edges=[]; idCounter=1; }
+        render();
     }
 
     function spawnNode(type) {
-        const c = getWorldMousePosition(window.innerWidth/2, window.innerHeight/2);
-        const cx = c.x - 130; const cy = c.y - 50;
-        if (type === 'task') {
-            const taskHtml = `<div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" value="Задача 1" oninput="saveNodeState(this)"><input type="date" class="task-date" onchange="saveNodeState(this)"></div><button class="add-task-btn" onclick="addTaskRow(this)">+ Пункт</button>`;
-            createNode(cx, cy, 'task', 'Список дел', taskHtml);
-        } else {
-            createNode(cx, cy, 'text', 'Заметка', 'Напиши что-нибудь...');
-        }
+        const id = 'n' + (idCounter++);
+        const cx = (-state.x + window.innerWidth/2)/state.scale - 130;
+        const cy = (-state.y + window.innerHeight/2)/state.scale - 50;
+        let content = 'Double click to edit';
+        if(type==='task') content = `<div style="display:flex; gap:10px;"><input type="checkbox"><input type="text" value="Task 1" style="background:transparent; border:none; width:100%;"></div>`;
+        nodes.push({ id, x: cx, y: cy, w: 260, type, title: 'Card', content, color: 'default' });
+        render(); saveSpace();
     }
 
-    function createNode(x, y, type, title, content) { addNodeData({ x, y, type, title, content }); renderAll(); }
-
-    function renderAll() {
-        document.querySelectorAll('.node').forEach(n => n.remove());
-        const defs = svgLayer.querySelector('defs');
-        svgLayer.innerHTML = ''; if(defs) svgLayer.appendChild(defs);
-        nodes.forEach(n => createNodeDOM(n));
-        edges.forEach(e => createEdgeDOM(e));
-    }
-
-    function createNodeDOM(node) {
-        const el = document.createElement('div');
-        el.id = node.id;
-        el.className = `node type-${node.type} color-${node.color} shape-${node.shape}`;
-        if(node.id === selectedNodeId) el.classList.add('selected');
-        el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; el.style.width = node.width + 'px';
-
-        let contentHtml = '';
-        if (['image','video'].includes(node.type)) {
-            contentHtml = `<div class="node-content ${node.type==='image'?'content-img':'content-video'}">${node.content}</div>`;
-        } else {
-            contentHtml = `<div class="node-content" ${node.type==='text'?'contenteditable="true"':''}>${node.content}</div>`;
-        }
-
-        el.innerHTML = `
-            <div class="node-header"><span class="header-text">${node.title}</span></div>
-            ${contentHtml}
-            <div class="resizer"></div>
-            <div class="handle h-top" data-side="top"></div>
-            <div class="handle h-right" data-side="right"></div>
-            <div class="handle h-bottom" data-side="bottom"></div>
-            <div class="handle h-left" data-side="left"></div>
-        `;
+    function render() {
+        document.querySelectorAll('.node').forEach(e=>e.remove());
+        const oldDefs = svg.querySelector('defs'); svg.innerHTML = ''; svg.appendChild(oldDefs);
         
-        // Events
-        const headerSpan = el.querySelector('.header-text');
-        headerSpan.addEventListener('dblclick', (e) => { e.stopPropagation(); headerSpan.contentEditable = true; headerSpan.focus(); });
-        headerSpan.addEventListener('blur', () => { headerSpan.contentEditable = false; if(node.title !== headerSpan.innerText) { node.title = headerSpan.innerText; saveCurrentSpaceData(); } });
-        headerSpan.addEventListener('keydown', e => { if(e.key==='Enter') headerSpan.blur(); });
-        if(node.type==='text') {
-            const cDiv = el.querySelector('.node-content');
-            cDiv.addEventListener('input', () => { node.content = cDiv.innerHTML; saveCurrentSpaceData(); });
-        }
-        
-        world.appendChild(el);
-        attachEvents(el, node);
-    }
+        nodes.forEach(n => {
+            const el = document.createElement('div');
+            el.className = `node ${n.id===selectedId?'selected':''}`;
+            el.style.left = n.x+'px'; el.style.top = n.y+'px'; el.style.width = n.w+'px';
+            if(n.color !== 'default') el.style.background = n.color === 'blue' ? 'rgba(0,122,255,0.1)' : n.color==='red'?'rgba(255,59,48,0.1)':'rgba(52,199,89,0.1)';
+            
+            let inn = '';
+            if(n.type === 'image') inn = `<div class="content-img">${n.content}</div>`;
+            else inn = `<div class="node-content" ${n.type==='text'?'contenteditable="true"':''}>${n.content}</div>`;
 
-    function attachEvents(el, node) {
-        el.querySelector('.node-header').addEventListener('mousedown', (e) => {
-            if(e.target.isContentEditable) return;
-            e.stopPropagation(); selectNode(node);
-            const mw = getWorldMousePosition(e.clientX, e.clientY);
-            dragObj = { type: 'node', node, ix: node.x, iy: node.y, ox: mw.x - node.x, oy: mw.y - node.y };
-        });
-        el.querySelector('.resizer').addEventListener('mousedown', (e) => {
-            e.stopPropagation(); dragObj = { type: 'resize', node, startX: e.clientX, startW: node.width };
-        });
-        el.querySelectorAll('.handle').forEach(h => {
-            h.addEventListener('mousedown', (e) => {
-                e.stopPropagation(); connectStart = { id: node.id, side: h.dataset.side };
-                tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                tempLine.setAttribute('class', 'connection'); 
-                tempLine.style.opacity = '0.5';
-                svgLayer.appendChild(tempLine);
+            el.innerHTML = `<div class="node-header"><span class="header-text">${n.title}</span></div>${inn}
+                            <div class="handle h-top" data-s="top"></div><div class="handle h-right" data-s="right"></div>
+                            <div class="handle h-bottom" data-s="bottom"></div><div class="handle h-left" data-s="left"></div>
+                            <div class="resizer"></div>`;
+            
+            el.querySelector('.header-text').addEventListener('dblclick', e => { e.target.contentEditable=true; e.target.focus(); });
+            el.querySelector('.header-text').addEventListener('blur', e => { e.target.contentEditable=false; n.title = e.target.innerText; saveSpace(); });
+            if(n.type==='text') el.querySelector('.node-content').addEventListener('input', e => { n.content = e.target.innerHTML; saveSpace(); });
+
+            el.onmousedown = e => { 
+                if(e.target.classList.contains('handle')) return;
+                e.stopPropagation(); selectedId=n.id; render(); 
+                const startX = (e.clientX - state.x)/state.scale - n.x;
+                const startY = (e.clientY - state.y)/state.scale - n.y;
+                if(e.target.classList.contains('resizer')) {
+                     drag = { type:'resize', n, sx: e.clientX, sw: n.w };
+                } else if(!e.target.isContentEditable) {
+                     drag = { type:'move', n, offX: startX, offY: startY };
+                }
+                showMenu(n);
+            };
+
+            // Handles
+            el.querySelectorAll('.handle').forEach(h => {
+                h.onmousedown = e => {
+                    e.stopPropagation(); e.preventDefault();
+                    connStart = { id: n.id, side: h.dataset.s, x: n.x, y: n.y, w: n.w, h: el.offsetHeight };
+                    tempLine = document.createElementNS('http://www.w3.org/2000/svg','path');
+                    tempLine.setAttribute('stroke', '#007AFF'); tempLine.setAttribute('stroke-width','2'); tempLine.setAttribute('fill','none');
+                    svg.appendChild(tempLine);
+                }
             });
+
+            world.appendChild(el);
         });
+
+        edges.forEach(e => drawEdge(e));
     }
 
-    // --- MOUSE & INTERACTION ---
-    window.addEventListener('mousedown', (e) => {
-        if(e.target.closest('#style-menu') || e.target.closest('.node') || e.target.closest('#modal-box') || e.target.closest('#sidebar')) return;
-        if(e.target === viewport || e.target === world) {
-            dragObj = { type: 'view', lx: e.clientX, ly: e.clientY };
-            viewport.style.cursor = 'grabbing'; deselectNode();
+    function drawEdge(e) {
+        const n1 = nodes.find(n=>n.id===e.f);
+        const n2 = nodes.find(n=>n.id===e.t);
+        if(!n1 || !n2) return;
+        const el1 = document.querySelectorAll('.node')[nodes.indexOf(n1)];
+        const el2 = document.querySelectorAll('.node')[nodes.indexOf(n2)];
+        if(!el1 || !el2) return;
+        
+        const p1 = getPort(n1, el1, e.fs);
+        const p2 = getPort(n2, el2, e.ts);
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('class', 'connection');
+        path.setAttribute('d', `M ${p1.x} ${p1.y} C ${p1.x + (e.fs=='right'?50:e.fs=='left'?-50:0)} ${p1.y+(e.fs=='bottom'?50:e.fs=='top'?-50:0)}, ${p2.x + (e.ts=='right'?50:e.ts=='left'?-50:0)} ${p2.y+(e.ts=='bottom'?50:e.ts=='top'?-50:0)}, ${p2.x} ${p2.y}`);
+        path.oncontextmenu = (ev) => { ev.preventDefault(); edges = edges.filter(x => x !== e); render(); saveSpace(); };
+        svg.appendChild(path);
+    }
+
+    function getPort(n, el, side) {
+        const h = el.offsetHeight;
+        if(side==='top') return {x: n.x+n.w/2, y: n.y};
+        if(side==='bottom') return {x: n.x+n.w/2, y: n.y+h};
+        if(side==='left') return {x: n.x, y: n.y+h/2};
+        return {x: n.x+n.w, y: n.y+h/2};
+    }
+
+    window.onmousemove = e => {
+        const mx = (e.clientX - state.x)/state.scale;
+        const my = (e.clientY - state.y)/state.scale;
+        if(drag) {
+            if(drag.type === 'move') { drag.n.x = mx - drag.offX; drag.n.y = my - drag.offY; }
+            if(drag.type === 'resize') { drag.n.w = Math.max(200, drag.sw + (e.clientX - drag.sx)/state.scale); }
+            render();
         }
-    });
-
-    window.addEventListener('mousemove', (e) => {
-        mousePos.x = e.clientX; mousePos.y = e.clientY;
-        const wp = getWorldMousePosition(mousePos.x, mousePos.y);
-
-        if (!dragObj && !connectStart) return;
-
-        if (dragObj?.type === 'view') {
-            state.panX += mousePos.x - dragObj.lx; state.panY += mousePos.y - dragObj.ly;
-            dragObj.lx = mousePos.x; dragObj.ly = mousePos.y;
-            updateTransform(); updateStyleMenu();
-        } else if (dragObj?.type === 'node') {
-            const n = dragObj.node;
-            n.x = wp.x - dragObj.ox; n.y = wp.y - dragObj.oy;
-            const el = document.getElementById(n.id);
-            if(el) { el.style.left = n.x + 'px'; el.style.top = n.y + 'px'; }
-            updateConnectedEdges(n.id); updateStyleMenu();
-        } else if (dragObj?.type === 'resize') {
-            const n = dragObj.node;
-            const newW = Math.max(150, dragObj.startW + (mousePos.x - dragObj.startX) / state.scale);
-            n.width = newW;
-            const el = document.getElementById(n.id);
-            if(el) el.style.width = newW + 'px';
-            updateConnectedEdges(n.id); updateStyleMenu();
-        } else if (connectStart) {
-            const sn = nodes.find(n => n.id === connectStart.id);
-            const sp = getHandlePos(sn.id, connectStart.side);
-            drawCurve(tempLine, sp.x, sp.y, wp.x, wp.y, connectStart.side, null);
+        if(connStart) {
+            let sx = connStart.x; let sy = connStart.y;
+            if(connStart.side=='right') { sx+=connStart.w; sy+=connStart.h/2; }
+            else if(connStart.side=='bottom') { sx+=connStart.w/2; sy+=connStart.h; }
+            else if(connStart.side=='left') { sy+=connStart.h/2; }
+            else { sx+=connStart.w/2; }
+            tempLine.setAttribute('d', `M ${sx} ${sy} L ${mx} ${my}`);
         }
-    });
+        if(e.buttons === 1 && e.target === viewport) {
+            state.x += e.movementX; state.y += e.movementY; updateTransform();
+        }
+    };
 
-    window.addEventListener('mouseup', (e) => {
-        if(dragObj?.type === 'node' || dragObj?.type === 'resize') { recordAction(); saveCurrentSpaceData(); }
-        dragObj = null; viewport.style.cursor = 'grab';
-
-        if(connectStart) {
+    window.onmouseup = e => {
+        if(drag) saveSpace(); drag = null;
+        if(connStart) {
+            tempLine.remove();
             const el = document.elementFromPoint(e.clientX, e.clientY);
             if(el && el.classList.contains('handle')) {
-                const tn = el.closest('.node');
-                if(tn.id !== connectStart.id) {
-                    recordAction();
-                    edges.push({ id:`e${Date.now()}`, from: connectStart.id, fSide: connectStart.side, to: tn.id, tSide: el.dataset.side });
-                    createEdgeDOM(edges[edges.length-1]);
-                    saveCurrentSpaceData();
+                const targetNode = nodes.find(n => Math.abs(n.x - ((e.clientX - state.x)/state.scale)) < n.w + 100 ); // Simple approximation
+                // better to find via DOM
+                const domNode = el.closest('.node'); 
+                const tn = nodes[Array.from(world.children).indexOf(domNode)];
+                if(tn && tn.id !== connStart.id) {
+                    edges.push({ f: connStart.id, fs: connStart.side, t: tn.id, ts: el.dataset.s });
+                    render(); saveSpace();
                 }
             }
-            if(tempLine) tempLine.remove();
-            tempLine = null; connectStart = null;
+            connStart = null;
         }
-    });
+    };
 
-    // Helper functions
-    function drawCurve(el, x1, y1, x2, y2, s1, s2) {
-        const sx=x1+SVG_OFFSET, sy=y1+SVG_OFFSET, ex=x2+SVG_OFFSET, ey=y2+SVG_OFFSET;
-        let c1x=sx, c1y=sy, c2x=ex, c2y=ey;
-        const dist = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
-        const off = Math.min(dist * 0.5, 150);
-        
-        if(s1==='top') c1y-=off; else if(s1==='bottom') c1y+=off; else if(s1==='left') c1x-=off; else c1x+=off;
-        if(s2) { if(s2==='top') c2y-=off; else if(s2==='bottom') c2y+=off; else if(s2==='left') c2x-=off; else c2x+=off; }
-        
-        el.setAttribute('d', `M ${sx} ${sy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey}`);
+    window.onwheel = e => { e.preventDefault(); state.scale += e.deltaY * -0.001; state.scale = Math.min(Math.max(0.2, state.scale), 3); updateTransform(); };
+    function updateTransform() { world.style.transform = `translate(${state.x}px, ${state.y}px) scale(${state.scale})`; }
+
+    function showMenu(n) {
+        const m = document.getElementById('style-menu');
+        m.style.display = 'flex';
+        const rect = document.querySelectorAll('.node')[nodes.indexOf(n)].getBoundingClientRect();
+        m.style.left = (rect.left + rect.width/2) + 'px';
+        m.style.top = (rect.top - 10) + 'px';
     }
+    document.addEventListener('mousedown', e => { if(!e.target.closest('.node') && !e.target.closest('#style-menu')) { selectedId=null; document.getElementById('style-menu').style.display='none'; render(); } });
 
-    function createEdgeDOM(edge) {
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.id = edge.id; path.setAttribute('class', 'connection');
-        path.addEventListener('contextmenu', (e) => {
-            e.preventDefault(); 
-            openModal({title:'Удалить связь?', confirmText:'Да', onConfirm:()=>{
-                recordAction(); edges = edges.filter(x=>x.id!==edge.id); path.remove(); saveCurrentSpaceData();
-            }});
-        });
-        svgLayer.appendChild(path); updateEdgePath(edge);
+    function applyStyle(p, v) { 
+        if(selectedId) { nodes.find(n=>n.id===selectedId)[p] = v; render(); saveSpace(); } 
     }
-
-    function updateConnectedEdges(nid) { edges.forEach(e => { if(e.from===nid || e.to===nid) updateEdgePath(e); }); }
-    function updateEdgePath(e) {
-        const el = document.getElementById(e.id);
-        if(el) {
-            const p1 = getHandlePos(e.from, e.fSide);
-            const p2 = getHandlePos(e.to, e.tSide);
-            drawCurve(el, p1.x, p1.y, p2.x, p2.y, e.fSide, e.tSide);
+    function deleteSelectedNode() {
+        if(selectedId) { nodes=nodes.filter(n=>n.id!==selectedId); edges=edges.filter(e=>e.f!==selectedId && e.t!==selectedId); selectedId=null; render(); saveSpace(); }
+    }
+    
+    // --- Utils for Modals ---
+    const modal = document.getElementById('modal-overlay');
+    function openMediaModal(type) {
+        modal.style.display = 'flex'; document.getElementById('modal-title').innerText = type==='image'?'Add Image':'Add Video';
+        document.getElementById('modal-body').innerHTML = `<input class="modal-input" placeholder="Paste URL..."><br><br><button class="btn" onclick="document.getElementById('hidden-file-input').click()">Or Upload File</button>`;
+        document.getElementById('modal-confirm').onclick = () => {
+            const val = document.querySelector('.modal-input').value;
+            if(val) {
+                const c = (-state.x + window.innerWidth/2)/state.scale;
+                const cy = (-state.y + window.innerHeight/2)/state.scale;
+                const content = type==='image' ? `<img src="${val}">` : `<iframe src="${val}" style="width:100%; height:200px; border:none;"></iframe>`;
+                nodes.push({id:'n'+(idCounter++), x:c-130, y:cy-100, w:300, type, title: type, content, color:'default'});
+                render(); saveSpace(); closeModal();
+            }
+        };
+        const fi = document.getElementById('hidden-file-input');
+        fi.onchange = (e) => {
+            const f = e.target.files[0];
+            const r = new FileReader();
+            r.onload = (ev) => {
+                const c = (-state.x + window.innerWidth/2)/state.scale;
+                const cy = (-state.y + window.innerHeight/2)/state.scale;
+                const content = type==='image' ? `<img src="${ev.target.result}">` : `<video src="${ev.target.result}" controls style="width:100%"></video>`;
+                nodes.push({id:'n'+(idCounter++), x:c-130, y:cy-100, w:300, type, title: type, content, color:'default'});
+                render(); saveSpace(); closeModal();
+            };
+            r.readAsDataURL(f);
         }
     }
-    function getHandlePos(nid, side) {
-        const el = document.getElementById(nid);
-        if(!el) return {x:0,y:0};
-        const x = parseFloat(el.style.left), y = parseFloat(el.style.top);
-        const w = el.offsetWidth, h = el.offsetHeight;
-        if(side==='top') return {x:x+w/2, y};
-        if(side==='right') return {x:x+w, y:y+h/2};
-        if(side==='bottom') return {x:x+w/2, y:y+h};
-        if(side==='left') return {x, y:y+h/2};
-        return {x,y};
+    function closeModal() { modal.style.display = 'none'; }
+    function openCreateSpaceModal() { 
+        const n = prompt("Space Name:"); 
+        if(n) { spaces.push(n); saveSpace(); localStorage.setItem('ob_spaces', JSON.stringify(spaces)); renderSpaces(); } 
     }
-
-    // Modal & UI Utils
-    function openModal({ title, message, inputPlaceholder, inputValue, confirmText='OK', onConfirm, extraHtml='' }) {
-        modalTitle.innerText = title; modalMsg.innerText = message||''; modalMsg.style.display = message?'block':'none'; modalBody.innerHTML = extraHtml;
-        let inputEl = null;
-        if (inputPlaceholder) {
-            inputEl = document.createElement('input'); inputEl.className = 'modal-input';
-            inputEl.placeholder = inputPlaceholder; inputEl.value = inputValue||'';
-            modalBody.appendChild(inputEl); setTimeout(() => inputEl.focus(), 100);
-            inputEl.onkeydown = (e) => { if(e.key==='Enter') doConfirm(); };
-        }
-        modalConfirmBtn.innerText = confirmText;
-        modalConfirmBtn.onclick = doConfirm;
-        function doConfirm() { if (onConfirm(inputEl ? inputEl.value : null) !== false) closeModal(); }
-        modal.style.display = 'flex';
-    }
-    function closeModal() { modal.style.display = 'none'; modalBody.innerHTML = ''; }
+    function confirmClearCanvas() { if(confirm("Clear All?")) { nodes=[]; edges=[]; render(); saveSpace(); } }
     
-    // Other actions
-    function openCreateSpaceModal() { openModal({ title: 'Новое пространство', inputPlaceholder: 'Название...', onConfirm: (n) => { if(n&&!spaces.includes(n)){ saveCurrentSpaceData(); spaces.push(n); localStorage.setItem('ob_spaces',JSON.stringify(spaces)); switchSpace(n); } } }); }
-    function openRenameSpaceModal(old) { openModal({ title: 'Переименовать', inputPlaceholder: 'Новое имя', inputValue: old, onConfirm: (n) => { if(n&&n!==old&&!spaces.includes(n)){ saveCurrentSpaceData(); const d=localStorage.getItem(`ob_space_${old}`); if(d){localStorage.setItem(`ob_space_${n}`,d); localStorage.removeItem(`ob_space_${old}`);} spaces[spaces.indexOf(old)]=n; localStorage.setItem('ob_spaces',JSON.stringify(spaces)); if(currentSpace===old){currentSpace=n; localStorage.setItem('ob_currentSpace',n);} renderSpacesSidebar(); } } }); }
-    function confirmDeleteSpace(n) { openModal({ title: 'Удалить?', message: `Удалить "${n}"?`, confirmText: 'Удалить', onConfirm: () => { spaces=spaces.filter(s=>s!==n); localStorage.removeItem(`ob_space_${n}`); localStorage.setItem('ob_spaces',JSON.stringify(spaces)); if(currentSpace===n) switchSpace(spaces[0]); else renderSpacesSidebar(); } }); }
-    function confirmClearCanvas() { openModal({ title: 'Очистить всё?', confirmText: 'Да', onConfirm: () => { recordAction(); nodes=[]; edges=[]; renderAll(); saveCurrentSpaceData(); } }); }
-    
-    function downloadBackup() { saveCurrentSpaceData(); const d={}; Object.keys(localStorage).forEach(k=>{if(k.startsWith('ob_'))d[k]=localStorage.getItem(k)}); const b=new Blob([JSON.stringify(d)],{type:'application/json'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=`backup-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(u); }
-    function triggerRestore() { backupInput.click(); }
-    backupInput.onchange = e => { const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=ev=>{ try{const d=JSON.parse(ev.target.result); if(!d.ob_spaces)throw 1; Object.keys(localStorage).forEach(k=>{if(k.startsWith('ob_'))localStorage.removeItem(k)}); Object.keys(d).forEach(k=>localStorage.setItem(k,d[k])); location.reload(); }catch(e){alert('Error');} }; r.readAsText(f); backupInput.value=''; };
-
-    function selectNode(n) { selectedNodeId=n.id; document.querySelectorAll('.node').forEach(x=>x.classList.remove('selected')); document.getElementById(n.id)?.classList.add('selected'); updateStyleMenu(); }
-    function deselectNode() { selectedNodeId=null; document.querySelectorAll('.node').forEach(x=>x.classList.remove('selected')); styleMenu.style.display='none'; }
-    function deleteSelectedNode() { if(selectedNodeId){ recordAction(); nodes=nodes.filter(n=>n.id!==selectedNodeId); edges=edges.filter(e=>e.from!==selectedNodeId&&e.to!==selectedNodeId); deselectNode(); renderAll(); saveCurrentSpaceData(); } }
-    function updateStyleMenu() {
-        if(!selectedNodeId) { styleMenu.style.display='none'; return; }
-        const el = document.getElementById(selectedNodeId);
-        if(el) { const r = el.getBoundingClientRect(); styleMenu.style.display = 'flex'; styleMenu.style.left = (r.left + r.width/2) + 'px'; styleMenu.style.top = (r.top - 50) + 'px'; }
-    }
-    function applyStyle(prop, val) { if(selectedNodeId) { const n=nodes.find(x=>x.id===selectedNodeId); recordAction(); n[prop]=val; renderAll(); selectNode(n); saveCurrentSpaceData(); } }
-    
-    window.toggleTask = function(btn) { btn.parentElement.classList.toggle('done'); saveNodeState(btn); };
-    window.addTaskRow = function(btn) { const r=document.createElement('div'); r.className='task-row'; r.innerHTML=`<div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input"><input type="date" class="task-date">`; btn.before(r); r.querySelector('.task-input').focus(); saveNodeState(btn); };
-    window.saveNodeState = function(el) { const n=nodes.find(x=>x.id===el.closest('.node').id); if(n){ const c=el.closest('.node').querySelector('.node-content'); c.querySelectorAll('input').forEach(i=>i.setAttribute('value',i.value)); n.content=c.innerHTML; saveCurrentSpaceData(); } };
-    
-    function openLinkModal() { openModal({ title: 'Ссылка', inputPlaceholder: 'https://...', onConfirm: (u) => { if(u) createNode(getWorldMousePosition().x-130, getWorldMousePosition().y-50, 'link', 'Link', `<a href="${u}" target="_blank">${u}</a>`); } }); }
-    function openMediaModal(t) { openModal({ title: t==='image'?'Картинка':'Видео', extraHtml: `<button class="btn primary" onclick="triggerFile('${t}')" style="width:100%; padding:10px; margin-bottom:10px;">Загрузить файл</button><div style="text-align:center; color:#888;">Или ссылка:</div>`, inputPlaceholder: 'https://...', onConfirm: (u) => { if(u) { const c=getWorldMousePosition(); if(t==='image') createNode(c.x-150, c.y-100, 'image', 'Img', `<img src="${u}">`); else createVideoNode(c.x-150, c.y-100, u); } } }); }
-    function triggerFile(t) { closeModal(); fileInput.setAttribute('accept', t==='image'?'image/*':'video/*'); fileInput.click(); fileInput.onchange = e => { const f=e.target.files[0]; if(f) { const r=new FileReader(); r.onload=ev=>createNode(getWorldMousePosition().x-150, getWorldMousePosition().y-100, t, t==='image'?'Img':'Video', t==='image'?`<img src="${ev.target.result}">`:`<video src="${ev.target.result}" controls></video>`); r.readAsDataURL(f); } fileInput.value=''; }; }
-    function createVideoNode(x, y, url) { const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/); const c = yt ? `<iframe src="https://www.youtube.com/embed/${yt[1]}" allowfullscreen></iframe>` : `<video src="${url}" controls></video>`; createNode(x, y, 'video', 'Video', c); }
-    
-    function recordAction() { if(historyStack.length>30) historyStack.shift(); historyStack.push(JSON.stringify({nodes, edges, idCounter})); }
-    window.addEventListener('keydown', e => { if((e.key==='Delete'||e.key==='Backspace')&&!e.target.isContentEditable&&e.target.tagName!=='INPUT') deleteSelectedNode(); if((e.ctrlKey||e.metaKey)&&e.key==='z') undo(); });
-    function undo() { if(historyStack.length){ const d=JSON.parse(historyStack.pop()); nodes=d.nodes; edges=d.edges; idCounter=d.idCounter; deselectNode(); renderAll(); saveCurrentSpaceData(); } }
-    function updateTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; }
-    viewport.addEventListener('wheel', (e) => { e.preventDefault(); const d = e.deltaY > 0 ? 0.9 : 1.1; state.scale = Math.min(Math.max(0.1, state.scale * d), 5); updateTransform(); updateStyleMenu(); }, {passive:false});
-
     init();
 </script>
 </body>
