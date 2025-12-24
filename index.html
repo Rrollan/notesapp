@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquid Canvas: Full Logic</title>
+    <title>Liquid Canvas: Dot Grid & Glass</title>
     <!-- Шрифт Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -25,68 +25,71 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 1. ФОН (ANIMATED LIQUID) --- */
-        .mesh-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
-            background: #ffffff;
-            overflow: hidden;
-        }
-        .mesh-blob {
-            position: absolute; border-radius: 50%;
-            filter: blur(60px); 
-            opacity: 0.9;
+        /* --- 1. ФОН: ТОЧКИ (DOT GRID) --- */
+        /* Применяем фон к #world, чтобы точки масштабировались вместе с контентом */
+        #world {
+            position: absolute; top: 0; left: 0; 
+            transform-origin: 0 0; 
             will-change: transform;
-            animation: float 20s infinite ease-in-out alternate;
-            mix-blend-mode: multiply;
-        }
-        
-        /* Яркие цвета для эффекта преломления */
-        .b1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #A0C4FF; animation-duration: 25s; }
-        .b2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #FFADAD; animation-duration: 30s; }
-        .b3 { top: 30%; left: 40%; width: 45vw; height: 45vw; background: #FDFFB6; animation-duration: 22s; }
-        .b4 { bottom: 10%; left: 10%; width: 40vw; height: 40vw; background: #CAFFBF; animation-duration: 28s; }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            50% { transform: translate(40px, 20px) scale(1.1) rotate(5deg); }
-            100% { transform: translate(-30px, 40px) scale(0.9) rotate(-5deg); }
+            width: 100000px; /* Делаем очень большим */
+            height: 100000px;
+            
+            /* Генерация точек через градиент */
+            background-color: #f4f4f7; /* Основной цвет фона */
+            background-image: radial-gradient(circle, #b0b0b5 1.5px, transparent 1.5px);
+            background-size: 24px 24px; /* Расстояние между точками */
         }
 
-        /* --- 2. СТИЛЬ LIQUID GLASS --- */
+        /* --- 2. СТИЛЬ LIQUID GLASS (ИЗ ВАШЕГО ПРИМЕРА) --- */
         .liquid-glass {
-            position: relative; isolation: isolate; border-radius: inherit;
+            position: relative;
+            isolation: isolate;
+            border-radius: inherit; /* Наследуем скругление от родителя */
             transition: transform 0.2s, box-shadow 0.2s;
         }
+
         .liquid-glass::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: inherit; pointer-events: none;
-            /* Внутренний свет */
-            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-            background: rgba(255, 255, 255, 0.1); 
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            /* Специфичная тень из вашего примера */
+            box-shadow: inset 0 0 39px 0px #c2c2c2; 
+            background-color: rgba(255, 255, 255, 0.03);
             z-index: 0;
+            border: 1px solid rgba(255, 255, 255, 0.4); /* Небольшая обводка для четкости */
         }
+
         .liquid-glass::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: inherit; pointer-events: none;
-            backdrop-filter: blur(15px) saturate(160%);
-            -webkit-backdrop-filter: blur(15px) saturate(160%);
-            /* Искажение через SVG */
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            /* Ссылка на SVG фильтр */
             filter: url(#liquid-glass-filter);
             -webkit-filter: url(#liquid-glass-filter);
+            isolation: isolate;
             z-index: -1;
         }
 
+        /* Фоллбэк для браузеров без поддержки */
         .liquid-glass-fallback {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(30px) saturate(150%);
-            border: 1px solid rgba(255,255,255,0.6);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            position: relative;
+            isolation: isolate;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
         .glass-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; }
 
-        /* --- 3. AUTO-HIDE PANELS --- */
+        /* --- 3. UI ПАНЕЛИ --- */
         .trigger-zone { position: fixed; z-index: 1999; }
         .trigger-left { top: 0; left: 0; width: 20px; height: 100%; }
         .trigger-top { top: 0; left: 0; width: 100%; height: 20px; }
@@ -112,19 +115,6 @@
         .toolbar-wrap { display: flex; flex-direction: column; gap: 12px; align-items: center; pointer-events: auto; }
         .toolbar { padding: 10px 16px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
         .toolbar-inner { display: flex; gap: 10px; align-items: center; }
-
-        /* --- 4. МЕНЮ СТИЛЕЙ (Исправлено) --- */
-        #style-menu {
-            position: absolute; display: none; z-index: 3000; 
-            padding: 8px 12px; border-radius: 100px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
-            transform: translate(-50%, -130%);
-            width: max-content; 
-            white-space: nowrap;
-        }
-        .style-menu-inner { display: flex; flex-direction: row; align-items: center; gap: 12px; }
-        .color-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; flex-shrink: 0;}
-        .color-btn:hover { transform: scale(1.2); }
 
         /* UI Elements */
         .btn {
@@ -159,10 +149,26 @@
         .backup-btn { background: rgba(255,255,255,0.5); border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 0.85rem; transition:0.2s; }
         .backup-btn:hover { background: #fff; }
 
+        /* --- 4. МЕНЮ СТИЛЕЙ --- */
+        #style-menu {
+            position: absolute; display: none; z-index: 3000; 
+            padding: 8px 12px; border-radius: 100px;
+            /* Меню стилей тоже делаем стеклянным, но без сильного искажения, чтобы не мылило кнопки */
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            transform: translate(-50%, -130%);
+            width: max-content; 
+            white-space: nowrap;
+        }
+        .style-menu-inner { display: flex; flex-direction: row; align-items: center; gap: 12px; }
+        .color-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; flex-shrink: 0;}
+        .color-btn:hover { transform: scale(1.2); }
+
         /* Canvas & Nodes */
         #viewport { position: absolute; top:0; left: 0; width: 100%; height: 100%; cursor: grab; overflow: hidden; }
         #viewport:active { cursor: grabbing; }
-        #world { position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform; }
+        
         #connections-layer { position: absolute; top: -50000px; left: -50000px; width: 100000px; height: 100000px; pointer-events: none; z-index: 0; }
         path.connection { fill: none; stroke: rgba(0,0,0,0.2); stroke-width: 2px; pointer-events: stroke; transition: stroke 0.2s; stroke-linecap: round; }
         path.connection:hover { stroke: var(--accent); stroke-width: 4px; cursor: pointer; }
@@ -170,18 +176,21 @@
         /* Карточки */
         .node {
             position: absolute; min-width: 260px;
+            /* border-radius наследуется liquid-glass, здесь ставим базу */
             border-radius: 28px;
             display: flex; flex-direction: column; z-index: 1; box-sizing: border-box; 
             transition: box-shadow 0.2s, transform 0.1s;
-            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.3);
+            /* Тень для самих карточек */
+            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.1);
         }
         .node:hover { box-shadow: 0 30px 80px -15px rgba(0,0,0,0.15); transform: translateY(-2px); z-index: 10; }
         .node.selected { box-shadow: 0 0 0 3px var(--accent), 0 30px 70px rgba(0,0,0,0.2); z-index: 20; }
         
-        .node.color-red .node-header { background: rgba(255, 59, 48, 0.1); color: #d63031; }
-        .node.color-green .node-header { background: rgba(52, 199, 89, 0.1); color: #27ae60; }
-        .node.color-blue .node-header { background: rgba(0, 122, 255, 0.1); color: #0984e3; }
-        .node.color-yellow .node-header { background: rgba(255, 204, 0, 0.15); color: #d35400; }
+        /* Цветовые акценты (применяются к Header внутри стекла) */
+        .node.color-red .node-header { background: rgba(255, 59, 48, 0.15); color: #d63031; }
+        .node.color-green .node-header { background: rgba(52, 199, 89, 0.15); color: #27ae60; }
+        .node.color-blue .node-header { background: rgba(0, 122, 255, 0.15); color: #0984e3; }
+        .node.color-yellow .node-header { background: rgba(255, 204, 0, 0.2); color: #d35400; }
 
         .node-wrapper { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; }
         .node-header {
@@ -198,7 +207,7 @@
         .content-video iframe, .content-video video { width: 100%; height: 100%; min-height: 200px; border: none; }
 
         .resizer { position: absolute; right: 0; bottom: 0; width: 25px; height: 25px; z-index: 20; cursor: se-resize; opacity: 0; }
-        .resizer::after { content: ''; position: absolute; right: 8px; bottom: 8px; width: 8px; height: 8px; border-right: 2px solid #999; border-bottom: 2px solid #999; border-radius: 2px; }
+        .resizer::after { content: ''; position: absolute; right: 8px; bottom: 8px; width: 8px; height: 8px; border-right: 2px solid #555; border-bottom: 2px solid #555; border-radius: 2px; }
         .node:hover .resizer { opacity: 1; }
         
         .handle {
@@ -216,23 +225,25 @@
         /* Tasks */
         .task-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; padding: 5px; border-radius: 8px; }
         .task-row:hover { background: rgba(0,0,0,0.03); }
-        .task-check { width: 20px; height: 20px; min-width: 20px; border: 2px solid #bbb; border-radius: 6px; cursor: pointer; position: relative; margin-top: 2px; background: rgba(255,255,255,0.5);}
+        .task-check { width: 20px; height: 20px; min-width: 20px; border: 2px solid #888; border-radius: 6px; cursor: pointer; position: relative; margin-top: 2px; background: rgba(255,255,255,0.5);}
         .task-input { background: transparent; border: none; color: #333; font-size: 1rem; width: 100%; outline: none; }
         .task-date { background: rgba(0,0,0,0.05); border: none; color: #777; font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; cursor: pointer; }
         .task-row.done { opacity: 0.6; }
         .task-row.done .task-check { background: var(--accent-green); border-color: var(--accent-green); }
         .task-row.done .task-input { text-decoration: line-through; }
-        .add-task-btn { width: 100%; padding: 10px; background: rgba(255,255,255,0.4); border: 1px dashed #ccc; color: #888; border-radius: 12px; cursor: pointer; font-size: 0.9rem;}
+        .add-task-btn { width: 100%; padding: 10px; background: rgba(255,255,255,0.4); border: 1px dashed #999; color: #555; border-radius: 12px; cursor: pointer; font-size: 0.9rem;}
         .add-task-btn:hover { border-color: var(--accent); color: var(--accent); background: #fff; }
 
         /* Modal */
         #modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.01); backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.2); backdrop-filter: blur(5px);
             z-index: 5000; display: none; justify-content: center; align-items: center;
         }
         #modal-box {
             width: 380px; padding: 40px; border-radius: 36px;
+            /* Тоже стекло */
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
             box-shadow: 0 40px 100px rgba(0,0,0,0.25);
             display: flex; flex-direction: column; gap: 20px;
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -248,24 +259,16 @@
 </head>
 <body>
 
-    <!-- SVG FILTER (Искажение стекла) -->
+    <!-- SVG FILTER (Обновлен под ваш запрос: seed=92, scale=52, stdDeviation=2) -->
     <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position: absolute; overflow: hidden;">
       <defs>
-        <filter id="liquid-glass-filter" x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.003 0.003" numOctaves="1" seed="5" result="noise" />
-          <feGaussianBlur in="noise" stdDeviation="1" result="blurred" />
-          <feDisplacementMap in="SourceGraphic" in2="blurred" scale="40" xChannelSelector="R" yChannelSelector="G" />
+        <filter id="liquid-glass-filter" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.005 0.005" numOctaves="2" seed="92" result="noise" />
+          <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
+          <feDisplacementMap in="SourceGraphic" in2="blurred" scale="52" xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </defs>
     </svg>
-
-    <!-- ФОН (Lava Blobs) -->
-    <div class="mesh-bg">
-        <div class="mesh-blob b1"></div>
-        <div class="mesh-blob b2"></div>
-        <div class="mesh-blob b3"></div>
-        <div class="mesh-blob b4"></div>
-    </div>
 
     <input type="file" id="hidden-file-input" multiple>
     <input type="file" id="backup-file-input" accept=".json">
@@ -305,15 +308,15 @@
             <div class="toolbar liquid-glass">
                 <div class="glass-content toolbar-inner">
                     <button class="btn danger" onclick="confirmClearCanvas()">Clear All</button>
-                    <span style="font-size: 11px; color:#666; margin-left:5px;">Ctrl+Z (Undo)</span>
+                    <span style="font-size: 11px; color:#666; margin-left:5px;">Ctrl+Z</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- МЕНЮ СТИЛЕЙ (ГОРИЗОНТАЛЬНОЕ) -->
-    <div id="style-menu" class="liquid-glass">
-        <div class="glass-content style-menu-inner">
+    <!-- МЕНЮ СТИЛЕЙ -->
+    <div id="style-menu">
+        <div class="style-menu-inner">
             <div class="color-btn" style="background:#fff;" onclick="applyStyle('color', 'default')"></div>
             <div class="color-btn" style="background:#ff3b30;" onclick="applyStyle('color', 'red')"></div>
             <div class="color-btn" style="background:#34c759;" onclick="applyStyle('color', 'green')"></div>
@@ -329,20 +332,19 @@
 
     <!-- MODAL -->
     <div id="modal-overlay">
-        <div id="modal-box" class="liquid-glass">
-            <div class="glass-content">
-                <h3 id="modal-title">Title</h3>
-                <div id="modal-message" style="display:none;"></div>
-                <div id="modal-body"></div>
-                <div class="modal-actions">
-                    <button class="btn" onclick="closeModal()">Cancel</button>
-                    <button id="modal-confirm-btn" class="btn primary">Confirm</button>
-                </div>
+        <div id="modal-box">
+            <h3 id="modal-title">Title</h3>
+            <div id="modal-message" style="display:none;"></div>
+            <div id="modal-body"></div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal()">Cancel</button>
+                <button id="modal-confirm-btn" class="btn primary">Confirm</button>
             </div>
         </div>
     </div>
 
     <div id="viewport">
+        <!-- ФОН и КОНТЕНТ ВНУТРИ WORLD -->
         <div id="world">
             <svg id="connections-layer" xmlns="http://www.w3.org/2000/svg">
                 <defs>
@@ -358,14 +360,21 @@
     // --- 0. ПРОВЕРКА БРАУЗЕРА (ДЛЯ СТЕКЛА) ---
     (function() {
       const ua = navigator.userAgent.toLowerCase();
-      const isChromium = ua.includes('chrome') || ua.includes('edg') || ua.includes('opr');
+      const isChromium = ua.includes('chrome') || ua.includes('edg') || ua.includes('opr') || ua.includes('opera');
       window.getGlassClass = function() {
+          // Если не Chromium, даем fallback класс
           return isChromium ? 'liquid-glass' : 'liquid-glass-fallback';
       }
+      
       const els = document.querySelectorAll('.liquid-glass');
       els.forEach(el => {
           if(!isChromium) { el.classList.remove('liquid-glass'); el.classList.add('liquid-glass-fallback'); }
       });
+      
+      if(!isChromium) {
+          // Также меняем стили для сайдбара и тулбара если браузер не поддерживает
+          document.documentElement.style.setProperty('--glass-bg', 'rgba(255,255,255,0.9)');
+      }
     })();
 
     // --- 1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
@@ -407,17 +416,7 @@
         updateTransform();
     }
 
-    // --- 2. ЭФФЕКТ ПАРАЛЛАКСА (Движение фона) ---
-    document.addEventListener('mousemove', (e) => {
-        const xPercent = (e.clientX / window.innerWidth - 0.5);
-        const yPercent = (e.clientY / window.innerHeight - 0.5);
-        document.querySelectorAll('.mesh-blob').forEach((blob, i) => {
-            const speed = (i + 1) * 30;
-            blob.style.transform = `translate(${xPercent * speed}px, ${yPercent * speed}px)`;
-        });
-    });
-
-    // --- 3. ИСТОРИЯ И ДАННЫЕ (UNDE/REDO) ---
+    // --- 2. ИСТОРИЯ И ДАННЫЕ ---
     function recordAction() {
         if(historyStack.length > 40) historyStack.shift();
         historyStack.push(JSON.stringify({nodes, edges, idCounter}));
@@ -449,7 +448,7 @@
         historyStack = []; deselectNode(); renderAll(); updateTransform();
     }
     
-    // --- 4. СОЗДАНИЕ НОД (КАРТОЧЕК) ---
+    // --- 3. СОЗДАНИЕ НОД ---
     function addNodeData(data) {
         recordAction();
         const id = data.id || ('node-' + idCounter++);
@@ -484,7 +483,7 @@
     function createNodeDOM(node) {
         const el = document.createElement('div');
         el.id = node.id;
-        // ДИНАМИЧЕСКИЙ КЛАСС (СТЕКЛО)
+        // Здесь присваивается класс для стекла
         el.className = `node ${window.getGlassClass()} type-${node.type} color-${node.color} shape-${node.shape}`;
         if(node.id === selectedNodeId) el.classList.add('selected');
         el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; el.style.width = node.width + 'px';
@@ -496,7 +495,6 @@
             contentHtml = `<div class="node-content" ${node.type==='text'?'contenteditable="true"':''}>${node.content}</div>`;
         }
 
-        // ОБЕРТКА (WRAPPER) ДЛЯ Z-INDEX ПОВЕРХ ИСКАЖЕНИЯ
         el.innerHTML = `
             <div class="node-wrapper">
                 <div class="node-header"><span class="header-text">${node.title}</span></div>
@@ -544,7 +542,7 @@
         });
     }
 
-    // --- 5. ВЗАИМОДЕЙСТВИЕ (МЫШЬ) ---
+    // --- 4. ВЗАИМОДЕЙСТВИЕ (МЫШЬ) ---
     window.addEventListener('mousedown', (e) => {
         if(e.target.closest('#style-menu') || e.target.closest('.node') || e.target.closest('#modal-box') || e.target.closest('#sidebar') || e.target.closest('.toolbar')) return;
         if(e.target === viewport || e.target === world) {
@@ -630,7 +628,7 @@
         if((e.ctrlKey||e.metaKey) && e.key==='z') undo();
     });
 
-    // --- 6. МАТЕМАТИКА И УТИЛИТЫ ---
+    // --- 5. МАТЕМАТИКА И УТИЛИТЫ ---
     function getWorldMousePosition(screenX, screenY) {
         const sx = screenX !== undefined ? screenX : mousePos.x;
         const sy = screenY !== undefined ? screenY : mousePos.y;
@@ -683,7 +681,7 @@
         return {x,y};
     }
 
-    // --- 7. ЗАДАЧИ И ФАЙЛЫ ---
+    // --- 6. ЗАДАЧИ И ФАЙЛЫ ---
     window.toggleTask = function(btn) { 
         btn.parentElement.classList.toggle('done'); 
         saveNodeState(btn); 
@@ -723,10 +721,10 @@
     
     function triggerFile(type) { closeModal(); fileInput.setAttribute('accept', type==='image'?'image/*':'video/*'); fileInput.click(); fileInput.onchange = e => { const f=e.target.files[0]; if(f) handleFile(f,type); fileInput.value=''; }; }
     function handleFile(f, t, c) { if(!c) c=getWorldMousePosition(window.innerWidth/2+100, window.innerHeight/2); const r = new FileReader(); r.onload = e => createNode(c.x, c.y, t, t==='image'?'Image':'Video', t==='image'?`<img src="${e.target.result}">`:`<video src="${e.target.result}" controls></video>`); r.readAsDataURL(f); }
-    function createVideoNode(x, y, url) { const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/); const c = yt ? `<iframe src="https://www.youtube.com/embed/${yt[1]}" allowfullscreen></iframe>` : `<video src="${url}" controls></video>`; createNode(x, y, 'video', 'Video', c); }
+    function createVideoNode(x, y, url) { const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/); const c = yt ? `<iframe src=" allowfullscreen></iframe>` : `<video src="${url}" controls></video>`; createNode(x, y, 'video', 'Video', c); }
     function openLinkModal() { openModal({ title: 'Add Link', inputPlaceholder: 'https://...', onConfirm: (u) => { if(u) createNode(getWorldMousePosition().x-130, getWorldMousePosition().y-50, 'link', 'Link', `<a href="${u}" target="_blank">${u}</a>`); } }); }
 
-    // --- 8. МОДАЛКИ И ПРОСТРАНСТВА ---
+    // --- 7. UI ---
     function openModal({ title, message, inputPlaceholder, inputValue, confirmText='OK', onConfirm, extraHtml='' }) {
         modalTitle.innerText = title; modalMsg.innerText = message||''; modalMsg.style.display = message?'block':'none'; modalBody.innerHTML = extraHtml;
         let inputEl = null;
@@ -764,7 +762,7 @@
     function triggerRestore() { backupInput.click(); }
     backupInput.onchange = e => { const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=ev=>{ try{const d=JSON.parse(ev.target.result); if(!d.ob_spaces)throw 1; Object.keys(localStorage).forEach(k=>{if(k.startsWith('ob_'))localStorage.removeItem(k)}); Object.keys(d).forEach(k=>localStorage.setItem(k,d[k])); location.reload(); }catch(e){alert('Backup Error');} }; r.readAsText(f); backupInput.value=''; };
 
-    // --- 9. ВЫБОР И СТИЛИ ---
+    // --- 8. ВЫБОР И СТИЛИ ---
     function selectNode(n) { selectedNodeId=n.id; document.querySelectorAll('.node').forEach(x=>x.classList.remove('selected')); document.getElementById(n.id)?.classList.add('selected'); updateStyleMenu(); }
     function deselectNode() { selectedNodeId=null; document.querySelectorAll('.node').forEach(x=>x.classList.remove('selected')); styleMenu.style.display='none'; }
     function deleteSelectedNode() { if(selectedNodeId){ recordAction(); nodes=nodes.filter(n=>n.id!==selectedNodeId); edges=edges.filter(e=>e.from!==selectedNodeId&&e.to!==selectedNodeId); deselectNode(); renderAll(); saveCurrentSpaceData(); } }
@@ -791,10 +789,11 @@
         } 
     }
     
-    // --- 10. ТРАНСФОРМАЦИЯ И СКРОЛЛ ---
+    // --- 9. ТРАНСФОРМАЦИЯ И ЗУМ ---
     function updateTransform() { 
+        // Фон с точками масштабируется вместе с блоком #world
         world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; 
-        world.style.backgroundPosition = `${-state.panX/state.scale}px ${-state.panY/state.scale}px`; 
+        // Мы убрали ручное смещение backgroundPosition, чтобы точки не "ездили" по фону
     }
     
     viewport.addEventListener('wheel', (e) => { 
