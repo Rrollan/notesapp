@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquid Canvas: Ultimate</title>
+    <title>Liquid Canvas: Full Power</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,200 +11,192 @@
             --accent: #007AFF;
             --accent-green: #34C759;
             --accent-red: #FF3B30;
+            --accent-orange: #FF9500;
             --sidebar-width: 280px;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-            background-color: #f2f2f7; /* Светло-серый, чтобы стекло читалось */
+            background-color: #F2F4F8; /* Светлый фон под стеклом */
             font-family: 'Inter', sans-serif;
             color: var(--text-primary);
             user-select: none;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 1. ФОН (Живые пятна для искажения) --- */
+        /* --- 1. ФОН: LIQUID LAVA (Сложная анимация) --- */
         .mesh-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
-            background: #ffffff;
-            overflow: hidden;
+            background: #F2F4F8; overflow: hidden;
         }
         .mesh-blob {
             position: absolute; border-radius: 50%;
-            filter: blur(60px); opacity: 0.8;
+            filter: blur(80px); opacity: 0.8;
             will-change: transform;
-            animation: float 20s infinite ease-in-out alternate;
+            animation: float 25s infinite cubic-bezier(0.4, 0, 0.2, 1) alternate;
         }
-        /* Яркие цвета, чтобы эффект distortion был виден */
-        .b1 { top: -10%; left: -10%; width: 60vw; height: 60vw; background: #FF9A9E; animation-duration: 25s; }
-        .b2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #FECFEF; animation-duration: 30s; }
-        .b3 { top: 40%; left: 30%; width: 45vw; height: 45vw; background: #a18cd1; opacity: 0.6; animation-duration: 22s; }
+        /* Цвета подобраны для красивого преломления */
+        .b1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #8EC5FC; animation-delay: 0s; } /* Blue */
+        .b2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #E0C3FC; animation-delay: -5s; } /* Purple */
+        .b3 { top: 30%; left: 40%; width: 40vw; height: 40vw; background: #FFDEE9; opacity: 0.7; animation-delay: -10s; } /* Pink */
+        .b4 { bottom: 10%; left: 10%; width: 35vw; height: 35vw; background: #B5FFFC; opacity: 0.6; animation-delay: -15s; } /* Cyan */
 
         @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(40px, 40px) scale(1.05); }
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(30px, 50px) scale(1.1) rotate(10deg); }
+            66% { transform: translate(-20px, 20px) scale(0.9) rotate(-5deg); }
+            100% { transform: translate(10px, -30px) scale(1.05) rotate(5deg); }
         }
 
-        /* --- 2. ТВОЙ СТИЛЬ LIQUID GLASS --- */
+        /* --- 2. СТИЛЬ LIQUID GLASS (ОБЪЕМ И ИСКАЖЕНИЕ) --- */
         .liquid-glass {
-          position: relative;
-          isolation: isolate;
-          border-radius: inherit; /* Важно для карточек */
+            position: relative; isolation: isolate; border-radius: inherit;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s;
         }
+        /* Блик и объем */
         .liquid-glass::before {
-          content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-          border-radius: inherit; pointer-events: none;
-          box-shadow: inset 0 0 40px 0px rgba(255, 255, 255, 0.5);
-          background-color: rgba(114, 214, 248, 0.1); /* Легкий тинт */
-          border: 1px solid rgba(255, 255, 255, 0.6); /* Четкая грань */
-          z-index: 0;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: inherit; pointer-events: none;
+            box-shadow: 
+                inset 0 0 20px rgba(255, 255, 255, 0.5), 
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.15) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.4); 
+            z-index: 0;
         }
+        /* Искажение */
         .liquid-glass::after {
-          content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-          border-radius: inherit; pointer-events: none;
-          backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
-          filter: url(#liquid-glass-filter); -webkit-filter: url(#liquid-glass-filter);
-          z-index: -1;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: inherit; pointer-events: none;
+            backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%);
+            filter: url(#liquid-glass-filter); -webkit-filter: url(#liquid-glass-filter);
+            z-index: -1; opacity: 0.9;
         }
-
-        /* Fallback для Safari/Firefox */
+        /* Fallback для старых браузеров */
         .liquid-glass-fallback {
-          position: relative; isolation: isolate;
-          background: rgba(255, 255, 255, 0.65);
-          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(25px) saturate(150%);
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
         }
 
-        /* Контент внутри стекла должен быть выше искажения */
-        .glass-content-layer {
-            position: relative; z-index: 2;
-        }
+        /* --- 3. UI: AUTO-HIDE (Выплывающие панели) --- */
+        .trigger-zone { position: fixed; z-index: 1999; }
+        .trigger-left { top: 0; left: 0; width: 20px; height: 100%; }
+        .trigger-top { top: 0; left: 0; width: 100%; height: 20px; }
 
-        /* --- UI Elements --- */
-        
-        /* Sidebar */
-        #sidebar {
-            position: fixed; top: 20px; left: 20px; bottom: 20px;
-            width: var(--sidebar-width); 
-            border-radius: 24px; z-index: 2000;
-            display: flex; flex-direction: column;
-            transition: 0.3s;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        #sidebar-container {
+            position: fixed; top: 20px; bottom: 20px; left: 20px;
+            width: var(--sidebar-width); z-index: 2000;
+            transform: translateX(calc(-100% - 40px)); opacity: 0;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
-        .sidebar-header { padding: 25px; font-weight: 700; font-size: 1.2rem; }
-        .sidebar-hint { font-size: 0.75rem; color: #666; padding: 0 25px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .space-list { flex-grow: 1; overflow-y: auto; padding: 15px; }
+        .trigger-left:hover ~ #sidebar-container, #sidebar-container:hover { transform: translateX(0); opacity: 1; }
+
+        #sidebar { width: 100%; height: 100%; display: flex; flex-direction: column; border-radius: 32px; box-shadow: 0 25px 60px rgba(0,0,0,0.15); }
+        .glass-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; }
+
+        #toolbar-container {
+            position: fixed; top: 20px; left: 0; right: 0; 
+            display: flex; justify-content: center; z-index: 2000; pointer-events: none;
+            transform: translateY(-150%); opacity: 0;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .trigger-top:hover ~ #toolbar-container, #toolbar-container:hover { transform: translateY(0); opacity: 1; }
+
+        .toolbar-wrap { display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: auto; }
+        .toolbar { padding: 10px 14px; border-radius: 24px; display: flex; gap: 10px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+
+        /* Элементы внутри UI */
+        .sidebar-header { padding: 30px 25px 20px; font-weight: 800; font-size: 1.4rem; color: #000; }
+        .sidebar-hint { font-size: 0.8rem; color: #666; padding: 0 25px 20px; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 10px; }
+        .space-list { flex-grow: 1; overflow-y: auto; padding: 0 15px; }
         .space-item {
-            padding: 10px 14px; margin-bottom: 5px; border-radius: 12px; cursor: pointer;
+            padding: 12px 18px; margin-bottom: 6px; border-radius: 16px; cursor: pointer;
             display: flex; justify-content: space-between; align-items: center;
             color: #444; transition: 0.2s; font-weight: 500;
         }
-        .space-item:hover { background: rgba(255,255,255,0.4); color: #000; }
-        .space-item.active { background: rgba(255,255,255,0.8); color: var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .space-del { opacity: 0; color: var(--accent-red); font-weight: bold;}
+        .space-item:hover { background: rgba(255,255,255,0.5); color: #000; transform: scale(1.02); }
+        .space-item.active { background: #fff; color: var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .space-del { opacity: 0; color: var(--accent-red); font-weight: bold; }
         .space-item:hover .space-del { opacity: 1; }
-        
+
         .add-space-btn {
-            background: rgba(255,255,255,0.4); border: 1px dashed #999; 
-            color: #555; margin: 10px 20px 20px; padding: 12px; border-radius: 12px; 
-            cursor: pointer; transition: 0.2s; font-weight: 600;
+            background: rgba(255,255,255,0.4); border: 1px dashed rgba(0,0,0,0.2); 
+            color: #555; margin: 10px 20px 25px; padding: 14px; border-radius: 18px; 
+            cursor: pointer; transition: 0.2s; font-weight: 600; text-align: center;
         }
-        .add-space-btn:hover { border-color: var(--accent); color: var(--accent); background: #fff; }
+        .add-space-btn:hover { background: #fff; border-color: var(--accent); color: var(--accent); }
 
-        .backup-section { border-top: 1px solid rgba(0,0,0,0.05); padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .backup-btn {
-            background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); padding: 10px;
-            border-radius: 10px; cursor: pointer; font-size: 0.85rem; transition: 0.2s;
-        }
-        .backup-btn:hover { background: #fff; transform: translateY(-1px); }
+        .backup-section { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 8px; }
+        .backup-btn { background: rgba(255,255,255,0.5); border: none; padding: 12px; border-radius: 14px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition:0.2s; }
+        .backup-btn:hover { background: #fff; transform: translateY(-2px); }
 
-        /* Toolbar */
-        #ui-layer {
-            position: fixed; top: 20px; left: calc(var(--sidebar-width) + 40px); z-index: 1000;
-            display: flex; gap: 10px; flex-direction: column; pointer-events: none;
-        }
-        .toolbar {
-            /* Применяем liquid glass */
-            padding: 8px 10px; border-radius: 20px; 
-            display: flex; gap: 8px; flex-wrap: wrap; 
-            pointer-events: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
         .btn {
-            background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.2); 
-            color: #333; padding: 8px 16px; border-radius: 12px; cursor: pointer; 
-            font-size: 0.9rem; transition: 0.2s; font-weight: 500;
+            background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.3); 
+            color: #111; padding: 10px 20px; border-radius: 16px; cursor: pointer; 
+            font-size: 0.95rem; transition: 0.2s; font-weight: 500;
         }
-        .btn:hover { background: #fff; transform: translateY(-2px); }
-        .btn.primary { background: #fff; color: #000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .btn.primary { background: #fff; color: #000; font-weight: 600; }
         .btn.danger { color: var(--accent-red); }
 
-        /* Canvas */
+        /* --- CANVAS --- */
         #viewport { position: absolute; top:0; left: 0; width: 100%; height: 100%; cursor: grab; overflow: hidden; }
         #viewport:active { cursor: grabbing; }
         #world { position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform; }
 
-        /* Connections */
         #connections-layer { position: absolute; top: -50000px; left: -50000px; width: 100000px; height: 100000px; pointer-events: none; z-index: 0; }
-        path.connection { fill: none; stroke: #b0b0b5; stroke-width: 2px; pointer-events: stroke; transition: stroke 0.2s; stroke-linecap: round; }
+        path.connection { fill: none; stroke: rgba(0,0,0,0.2); stroke-width: 2px; pointer-events: stroke; transition: stroke 0.2s; stroke-linecap: round; }
         path.connection.temp { stroke-dasharray: 6,6; opacity: 0.6; stroke: var(--accent); }
         path.connection:hover { stroke: var(--accent); stroke-width: 4px; cursor: pointer; }
 
-        /* --- NODES (Карточки) --- */
+        /* --- NODES (Liquid Cards) --- */
         .node {
-            position: absolute; min-width: 240px;
-            border-radius: 24px; /* Чтобы border-radius: inherit в стекле сработал */
+            position: absolute; min-width: 260px;
+            border-radius: 28px;
             display: flex; flex-direction: column; z-index: 1; box-sizing: border-box; 
-            transition: box-shadow 0.2s, transform 0.1s;
-            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s, transform 0.2s;
+            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.2);
         }
-        .node:hover { box-shadow: 0 30px 60px -15px rgba(0,0,0,0.2); z-index: 5; }
-        .node.selected { box-shadow: 0 0 0 3px var(--accent), 0 30px 60px rgba(0,0,0,0.2); z-index: 10; }
+        .node:hover { box-shadow: 0 35px 80px -15px rgba(0,0,0,0.2); transform: translateY(-2px); z-index: 10; }
+        .node.selected { box-shadow: 0 0 0 3px var(--accent), 0 30px 70px rgba(0,0,0,0.2); z-index: 20; }
         
-        /* Node content styling wrapper */
-        .node-wrapper {
-            position: relative; z-index: 2; /* Поверх искажения */
-            display: flex; flex-direction: column; height: 100%;
-        }
+        /* Node Colors */
+        .node.color-red .node-header { background: rgba(255, 59, 48, 0.1); color: #d63031; }
+        .node.color-green .node-header { background: rgba(52, 199, 89, 0.1); color: #27ae60; }
+        .node.color-blue .node-header { background: rgba(0, 122, 255, 0.1); color: #0984e3; }
+        .node.color-yellow .node-header { background: rgba(255, 204, 0, 0.15); color: #d35400; }
+        
+        .node-wrapper { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; }
 
         .node-header {
-            padding: 15px 20px; font-weight: 600; font-size: 0.95rem;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            cursor: grab; display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 24px; font-weight: 600; font-size: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            border-radius: 28px 28px 0 0; cursor: grab;
+            display: flex; justify-content: space-between; align-items: center;
         }
         .header-text { outline: none; border-bottom: 1px solid transparent; max-width: 85%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
         .header-text:focus { border-bottom: 1px solid var(--accent); }
 
         .node-content {
-            padding: 20px; font-size: 0.95rem; line-height: 1.5; outline: none;
+            padding: 24px; font-size: 1rem; line-height: 1.6; outline: none;
             color: #1d1d1f; word-break: break-word; cursor: text; flex-grow: 1;
         }
         
-        .content-img, .content-video { padding: 0; display: flex; justify-content: center; background: rgba(0,0,0,0.03); border-radius: 0 0 24px 24px; overflow: hidden; }
+        .content-img, .content-video { padding: 0; display: flex; justify-content: center; background: rgba(0,0,0,0.03); border-radius: 0 0 28px 28px; overflow: hidden; }
         .content-img img { width: 100%; height: auto; display: block; pointer-events: none; }
         .content-video iframe, .content-video video { width: 100%; height: 100%; min-height: 200px; border: none; }
         
-        /* Resizer */
+        /* Resizer & Handles */
         .resizer {
-            position: absolute; right: 0; bottom: 0; width: 20px; height: 20px; z-index: 20;
+            position: absolute; right: 0; bottom: 0; width: 25px; height: 25px; z-index: 20;
             cursor: se-resize; opacity: 0; transition: opacity 0.2s;
         }
-        .resizer::after { content: ''; position: absolute; right: 6px; bottom: 6px; width: 8px; height: 8px; border-right: 2px solid #999; border-bottom: 2px solid #999; border-radius: 2px; }
+        .resizer::after { content: ''; position: absolute; right: 8px; bottom: 8px; width: 8px; height: 8px; border-right: 2px solid #999; border-bottom: 2px solid #999; border-radius: 2px; }
         .node:hover .resizer { opacity: 1; }
 
-        /* Tasks */
-        .task-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; padding: 5px; border-radius: 6px; transition: 0.2s; }
-        .task-row:hover { background: rgba(0,0,0,0.03); }
-        .task-check { width: 18px; height: 18px; min-width: 18px; border: 2px solid #bbb; border-radius: 6px; cursor: pointer; position: relative; margin-top: 2px; background: rgba(255,255,255,0.5);}
-        .task-input { background: transparent; border: none; color: #333; font-size: 0.95rem; width: 100%; outline: none; font-family: 'Inter', sans-serif;}
-        .task-date { background: rgba(0,0,0,0.05); border: none; color: #777; font-size: 0.75rem; padding: 3px 6px; border-radius: 6px; cursor: pointer; }
-        .task-row.done { opacity: 0.6; }
-        .task-row.done .task-check { background: var(--accent-green); border-color: var(--accent-green); }
-        .task-row.done .task-input { text-decoration: line-through; }
-        .add-task-btn { width: 100%; padding: 8px; background: rgba(255,255,255,0.4); border: 1px dashed #ccc; color: #888; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 0.85rem;}
-        .add-task-btn:hover { border-color: var(--accent); color: var(--accent); background: #fff; }
-
-        /* Handles */
         .handle {
             position: absolute; width: 24px; height: 24px; background: transparent; cursor: crosshair; z-index: 30;
             display: flex; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s;
@@ -220,126 +212,145 @@
         .h-bottom { bottom: -12px; left: 50%; transform: translateX(-50%); }
         .h-left { left: -12px; top: 50%; transform: translateY(-50%); }
 
-        /* Style Menu (Liquid) */
+        /* Tasks */
+        .task-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; padding: 5px; border-radius: 8px; transition: 0.2s; }
+        .task-row:hover { background: rgba(0,0,0,0.03); }
+        .task-check { width: 20px; height: 20px; min-width: 20px; border: 2px solid #bbb; border-radius: 6px; cursor: pointer; position: relative; margin-top: 2px; background: rgba(255,255,255,0.5);}
+        .task-input { background: transparent; border: none; color: #333; font-size: 1rem; width: 100%; outline: none; font-family: 'Inter', sans-serif;}
+        .task-date { background: rgba(0,0,0,0.05); border: none; color: #777; font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; cursor: pointer; }
+        .task-row.done { opacity: 0.6; }
+        .task-row.done .task-check { background: var(--accent-green); border-color: var(--accent-green); }
+        .task-row.done .task-input { text-decoration: line-through; }
+        .add-task-btn { width: 100%; padding: 10px; background: rgba(255,255,255,0.4); border: 1px dashed #ccc; color: #888; border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 0.9rem;}
+        .add-task-btn:hover { border-color: var(--accent); color: var(--accent); background: #fff; }
+
+        /* Style Menu */
         #style-menu {
             position: absolute; display: none; z-index: 2000; 
-            padding: 8px; border-radius: 50px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            gap: 8px; align-items: center; pointer-events: auto; transform: translate(-50%, -130%);
+            padding: 10px 14px; border-radius: 50px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            gap: 10px; align-items: center; transform: translate(-50%, -150%);
         }
-        .style-content { position: relative; z-index: 2; display: flex; gap: 8px; align-items: center; }
-        .color-btn { width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
+        .color-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
         .color-btn:hover { transform: scale(1.2); }
 
-        /* Modals (Liquid) */
+        /* Modals */
         #modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.4); backdrop-filter: blur(5px);
+            background: rgba(255,255,255,0.01); backdrop-filter: blur(10px);
             z-index: 5000; display: none; justify-content: center; align-items: center;
         }
         #modal-box {
-            width: 340px; padding: 30px; border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-            display: flex; flex-direction: column; gap: 15px;
-            animation: popIn 0.2s ease-out;
+            width: 380px; padding: 40px; border-radius: 36px;
+            box-shadow: 0 40px 120px rgba(0,0,0,0.25);
+            display: flex; flex-direction: column; gap: 20px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .modal-content-wrap { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 15px; }
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes popIn { from { transform: scale(0.9) translateY(30px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
         
-        #modal-title { margin: 0; color: #000; font-size: 1.2rem; font-weight: 700; }
-        #modal-message { font-size: 0.95rem; color: #666; line-height: 1.4; }
+        #modal-title { margin: 0; color: #000; font-size: 1.4rem; font-weight: 700; text-align: center; }
+        #modal-message { font-size: 1rem; color: #555; line-height: 1.5; text-align: center;}
         .modal-input {
-            background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.1); color: #333;
-            padding: 12px; border-radius: 10px; outline: none; width: 100%; box-sizing: border-box; font-size: 1rem;
+            background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.1); color: #333;
+            padding: 16px; border-radius: 16px; outline: none; width: 100%; box-sizing: border-box; font-size: 1.1rem;
         }
-        .modal-input:focus { background: #fff; border-color: var(--accent); }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+        .modal-input:focus { background: #fff; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0,122,255,0.1); }
+        .modal-actions { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
         
-        #hidden-file-input { display: none; }
-        #backup-file-input { display: none; }
+        #hidden-file-input, #backup-file-input { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- SVG FILTER (Секрет искажения) -->
+    <!-- SVG FILTER: Секрет искажения (Distortion) -->
     <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position: absolute; overflow: hidden;">
       <defs>
         <filter id="liquid-glass-filter" x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.005 0.005" numOctaves="1" seed="92" result="noise" />
-          <feGaussianBlur in="noise" stdDeviation="1.5" result="blurred" />
-          <feDisplacementMap in="SourceGraphic" in2="blurred" scale="50" xChannelSelector="R" yChannelSelector="G" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.003 0.003" numOctaves="1" seed="5" result="noise" />
+          <feGaussianBlur in="noise" stdDeviation="1" result="blurred" />
+          <feDisplacementMap in="SourceGraphic" in2="blurred" scale="40" xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </defs>
     </svg>
 
-    <!-- MESH BACKGROUND -->
+    <!-- BACKGROUND -->
     <div class="mesh-bg">
         <div class="mesh-blob b1"></div>
         <div class="mesh-blob b2"></div>
         <div class="mesh-blob b3"></div>
+        <div class="mesh-blob b4"></div>
     </div>
 
     <input type="file" id="hidden-file-input" multiple>
     <input type="file" id="backup-file-input" accept=".json">
 
-    <!-- SIDEBAR (Liquid) -->
-    <div id="sidebar" class="liquid-glass">
-        <div class="glass-content-layer">
-            <div class="sidebar-header">Liquid Ultimate</div>
-            <div class="sidebar-hint">DblClick для переименования</div>
-            <div class="space-list" id="space-list"></div>
-            <button class="add-space-btn" onclick="openCreateSpaceModal()">+ Новое пространство</button>
-            <div class="backup-section">
-                <button class="backup-btn" onclick="downloadBackup()">↓ Скачать бэкап</button>
-                <button class="backup-btn restore" onclick="triggerRestore()">↑ Восстановить</button>
+    <!-- TRIGGERS FOR AUTO-HIDE -->
+    <div class="trigger-zone trigger-left"></div>
+    <div class="trigger-zone trigger-top"></div>
+
+    <!-- SIDEBAR WRAPPER -->
+    <div id="sidebar-container">
+        <div id="sidebar" class="liquid-glass">
+            <div class="glass-content">
+                <div class="sidebar-header">Liquid Canvas</div>
+                <div class="sidebar-hint">Auto-hide Enabled</div>
+                <div class="space-list" id="space-list"></div>
+                <div class="add-space-btn" onclick="openCreateSpaceModal()">+ New Space</div>
+                <div class="backup-section">
+                    <button class="backup-btn" onclick="downloadBackup()">↓ Download Backup</button>
+                    <button class="backup-btn restore" onclick="triggerRestore()">↑ Restore Backup</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- UI LAYER -->
-    <div id="ui-layer">
-        <div class="toolbar liquid-glass">
-            <div class="glass-content-layer" style="display: flex; gap: 8px;">
-                <button class="btn primary" onclick="spawnNode('text')">Текст</button>
-                <button class="btn" onclick="openMediaModal('image')">Картинка</button>
-                <button class="btn" onclick="openMediaModal('video')">Видео</button>
-                <button class="btn" onclick="spawnNode('task')">Задачи</button>
-                <button class="btn" onclick="openLinkModal()">Ссылка</button>
+    <!-- TOOLBAR WRAPPER -->
+    <div id="toolbar-container">
+        <div class="toolbar-wrap">
+            <div class="toolbar liquid-glass">
+                <div class="glass-content" style="display:flex; gap:10px;">
+                    <button class="btn primary" onclick="spawnNode('text')">Text</button>
+                    <button class="btn" onclick="openMediaModal('image')">Image</button>
+                    <button class="btn" onclick="openMediaModal('video')">Video</button>
+                    <button class="btn" onclick="spawnNode('task')">Tasks</button>
+                    <button class="btn" onclick="openLinkModal()">Link</button>
+                </div>
             </div>
-        </div>
-        <div class="toolbar liquid-glass">
-            <div class="glass-content-layer">
-                <button class="btn danger" onclick="confirmClearCanvas()">Очистить всё</button>
+            <div class="toolbar liquid-glass">
+                <div class="glass-content">
+                    <button class="btn danger" onclick="confirmClearCanvas()">Clear All</button>
+                    <span style="font-size: 11px; color:#666; align-self: center; margin-left:10px;">Ctrl+Z: Undo | Ctrl+V: Paste</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Floating Menu (Liquid) -->
+    <!-- STYLE MENU -->
     <div id="style-menu" class="liquid-glass">
-        <div class="glass-content-layer style-content">
-            <div class="color-btn" style="background:#f5f5f7;" onclick="applyStyle('color', 'default')"></div>
+        <div class="glass-content" style="display:flex; gap:10px; align-items:center;">
+            <div class="color-btn" style="background:#fff;" onclick="applyStyle('color', 'default')"></div>
             <div class="color-btn" style="background:#ff3b30;" onclick="applyStyle('color', 'red')"></div>
             <div class="color-btn" style="background:#34c759;" onclick="applyStyle('color', 'green')"></div>
             <div class="color-btn" style="background:#007aff;" onclick="applyStyle('color', 'blue')"></div>
             <div class="color-btn" style="background:#ff9500;" onclick="applyStyle('color', 'yellow')"></div>
-            <div style="width: 1px; height: 15px; background: #999; margin: 0 4px;"></div>
-            <button class="btn" style="padding: 2px 6px; font-size: 10px;" onclick="applyStyle('shape', 'default')">Rect</button>
-            <button class="btn" style="padding: 2px 6px; font-size: 10px;" onclick="applyStyle('shape', 'round')">Round</button>
-            <div style="width: 1px; height: 15px; background: #999; margin: 0 4px;"></div>
-            <button class="btn danger" style="padding: 2px 6px; font-size: 12px; font-weight:bold;" onclick="deleteSelectedNode()">✕</button>
+            <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.1); margin: 0 4px;"></div>
+            <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="applyStyle('shape', 'default')">Rect</button>
+            <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="applyStyle('shape', 'round')">Round</button>
+            <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.1); margin: 0 4px;"></div>
+            <button class="btn danger" style="padding: 4px 10px; font-size: 12px; font-weight:bold;" onclick="deleteSelectedNode()">✕</button>
         </div>
     </div>
 
-    <!-- MODAL (Liquid) -->
+    <!-- UNIFIED MODAL -->
     <div id="modal-overlay">
         <div id="modal-box" class="liquid-glass">
-            <div class="modal-content-wrap">
-                <h3 id="modal-title">Заголовок</h3>
+            <div class="glass-content">
+                <h3 id="modal-title">Title</h3>
                 <div id="modal-message" style="display:none;"></div>
                 <div id="modal-body"></div>
                 <div class="modal-actions">
-                    <button class="btn" onclick="closeModal()">Отмена</button>
-                    <button id="modal-confirm-btn" class="btn primary">OK</button>
+                    <button class="btn" onclick="closeModal()">Cancel</button>
+                    <button id="modal-confirm-btn" class="btn primary">Confirm</button>
                 </div>
             </div>
         </div>
@@ -372,7 +383,7 @@
       });
     })();
 
-    // --- 1. CORE LOGIC (Restored) ---
+    // --- 1. CORE VARIABLES & INIT ---
     let spaces = JSON.parse(localStorage.getItem('ob_spaces')) || ['Main'];
     let currentSpace = localStorage.getItem('ob_currentSpace') || 'Main';
     const SVG_OFFSET = 50000;
@@ -395,13 +406,13 @@
     let nodes = [];
     let edges = [];
     let idCounter = 1;
-    let historyStack = [];
+    let historyStack = []; // For Undo
     let selectedNodeId = null;
 
     let dragObj = null; 
     let connectStart = null; 
     let tempLine = null;
-    let mousePos = { x: window.innerWidth/2 + 110, y: window.innerHeight/2 }; 
+    let mousePos = { x: window.innerWidth/2, y: window.innerHeight/2 }; 
 
     function init() {
         renderSpacesSidebar();
@@ -410,7 +421,7 @@
         updateTransform();
     }
 
-    // --- PARALLAX FOR BACKGROUND ---
+    // --- 2. PARALLAX BACKGROUND ---
     document.addEventListener('mousemove', (e) => {
         const xPercent = (e.clientX / window.innerWidth - 0.5);
         const yPercent = (e.clientY / window.innerHeight - 0.5);
@@ -420,7 +431,19 @@
         });
     });
 
-    // --- DATA MANAGEMENT ---
+    // --- 3. DATA & HISTORY ---
+    function recordAction() {
+        if(historyStack.length > 40) historyStack.shift();
+        historyStack.push(JSON.stringify({nodes, edges, idCounter}));
+    }
+
+    function undo() {
+        if(!historyStack.length) return;
+        const d = JSON.parse(historyStack.pop());
+        nodes = d.nodes; edges = d.edges; idCounter = d.idCounter;
+        deselectNode(); renderAll(); saveCurrentSpaceData();
+    }
+
     function saveCurrentSpaceData() {
         const data = { nodes, edges, idCounter, state };
         localStorage.setItem(`ob_space_${currentSpace}`, JSON.stringify(data));
@@ -435,34 +458,34 @@
         } else {
             nodes = []; edges = []; idCounter = 1;
             state = { scale: 1, panX: window.innerWidth/2, panY: window.innerHeight/2 };
-            addNodeData({ x: 50, y: 50, type: 'text', title: 'Start', content: 'Welcome to Liquid Ultimate' });
+            addNodeData({ x: 50, y: 50, type: 'text', title: 'Start', content: 'Welcome to Liquid Canvas' });
         }
         historyStack = []; deselectNode(); renderAll(); updateTransform();
     }
 
-    // --- NODE CREATION ---
+    // --- 4. NODE LOGIC ---
     function addNodeData(data) {
         recordAction();
         const id = data.id || ('node-' + idCounter++);
-        const w = data.width || (['video','image'].includes(data.type) ? 300 : 250);
+        const w = data.width || (['video','image'].includes(data.type) ? 320 : 260);
         const newNode = { ...data, id, width: w, color: data.color||'default', shape: data.shape||'default' };
         nodes.push(newNode); saveCurrentSpaceData(); return newNode;
     }
 
     function spawnNode(type) {
         const c = getWorldMousePosition();
-        const cx = c.x - 125; const cy = c.y - 40;
+        const cx = c.x - 130; 
+        const cy = c.y - 50;
         if (type === 'task') {
-            const taskHtml = `<div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" value="Задача" oninput="saveNodeState(this)"><input type="date" class="task-date" onchange="saveNodeState(this)"></div><button class="add-task-btn" onclick="addTaskRow(this)">+ Пункт</button>`;
-            createNode(cx, cy, 'task', 'Задачи', taskHtml);
+            const taskHtml = `<div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" value="Task Item" oninput="saveNodeState(this)"><input type="date" class="task-date" onchange="saveNodeState(this)"></div><button class="add-task-btn" onclick="addTaskRow(this)">+ Add Item</button>`;
+            createNode(cx, cy, 'task', 'To-Do List', taskHtml);
         } else {
-            createNode(cx, cy, 'text', 'Заметка', 'Текст...');
+            createNode(cx, cy, 'text', 'Note', 'Your text here...');
         }
     }
 
     function createNode(x, y, type, title, content) { addNodeData({ x, y, type, title, content }); renderAll(); }
 
-    // --- RENDERER ---
     function renderAll() {
         document.querySelectorAll('.node').forEach(n => n.remove());
         const defs = svgLayer.querySelector('defs');
@@ -475,7 +498,7 @@
     function createNodeDOM(node) {
         const el = document.createElement('div');
         el.id = node.id;
-        // APPLY DYNAMIC LIQUID CLASS
+        // DYNAMIC CLASS FOR LIQUID EFFECT
         el.className = `node ${window.getGlassClass()} type-${node.type} color-${node.color} shape-${node.shape}`;
         if(node.id === selectedNodeId) el.classList.add('selected');
         el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; el.style.width = node.width + 'px';
@@ -487,7 +510,7 @@
             contentHtml = `<div class="node-content" ${node.type==='text'?'contenteditable="true"':''}>${node.content}</div>`;
         }
 
-        // Structure adapted for liquid glass (wrapper for z-index)
+        // WRAPPER DIV for z-index layering over distortion
         el.innerHTML = `
             <div class="node-wrapper">
                 <div class="node-header"><span class="header-text">${node.title}</span></div>
@@ -500,18 +523,13 @@
             <div class="handle h-left" data-side="left"></div>
         `;
         
-        // Colors
-        if(node.color !== 'default') {
-             // Simple background tint for colored nodes
-             const tints = { red: 'rgba(255,59,48,0.1)', green: 'rgba(52,199,89,0.1)', blue: 'rgba(0,122,255,0.1)', yellow: 'rgba(255,204,0,0.1)' };
-             el.style.backgroundColor = tints[node.color];
-        }
-        if(node.shape === 'round') el.style.borderRadius = '30px';
+        if(node.shape === 'round') el.style.borderRadius = '32px';
 
         const headerSpan = el.querySelector('.header-text');
-        headerSpan.addEventListener('dblclick', (e) => { e.stopPropagation(); headerSpan.contentEditable = true; headerSpan.focus(); });
+        headerSpan.addEventListener('dblclick', (e) => { e.stopPropagation(); headerSpan.contentEditable = true; headerSpan.focus(); document.execCommand('selectAll',false,null); });
         headerSpan.addEventListener('blur', () => { headerSpan.contentEditable = false; if(node.title !== headerSpan.innerText) { node.title = headerSpan.innerText; saveCurrentSpaceData(); } });
         headerSpan.addEventListener('keydown', e => { if(e.key==='Enter') headerSpan.blur(); });
+        
         if(node.type==='text') {
             const cDiv = el.querySelector('.node-content');
             cDiv.addEventListener('input', () => { node.content = cDiv.innerHTML; saveCurrentSpaceData(); });
@@ -540,7 +558,7 @@
         });
     }
 
-    // --- INTERACTION HANDLERS ---
+    // --- 5. INTERACTION & EVENTS ---
     window.addEventListener('mousedown', (e) => {
         if(e.target.closest('#style-menu') || e.target.closest('.node') || e.target.closest('#modal-box') || e.target.closest('#sidebar') || e.target.closest('.toolbar')) return;
         if(e.target === viewport || e.target === world) {
@@ -599,7 +617,34 @@
         }
     });
 
-    // --- MATH & UTILS ---
+    // --- PASTE SUPPORT (Вернул) ---
+    window.addEventListener('paste', (e) => {
+        if(e.target.isContentEditable || e.target.tagName === 'INPUT') return;
+        e.preventDefault();
+        
+        const c = getWorldMousePosition();
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let item of items) {
+            if (item.kind === 'file') {
+                const blob = item.getAsFile();
+                handleFile(blob, item.type.includes('image') ? 'image' : 'video', {x: c.x - 150, y: c.y - 100});
+                return;
+            }
+        }
+        const text = e.clipboardData.getData('text');
+        if (text) {
+             if(text.match(/^http/)) createNode(c.x - 130, c.y - 50, 'link', 'Link', `<a href="${text}" target="_blank">${text}</a>`);
+             else createNode(c.x - 130, c.y - 50, 'text', 'Note', text);
+        }
+    });
+
+    // --- SHORTCUTS (Delete, Undo) ---
+    window.addEventListener('keydown', (e) => {
+        if((e.key === 'Delete' || e.key === 'Backspace') && !e.target.isContentEditable && e.target.tagName !== 'INPUT') deleteSelectedNode();
+        if((e.ctrlKey||e.metaKey) && e.key==='z') undo();
+    });
+
+    // --- 6. UTILS & HELPERS ---
     function getWorldMousePosition(screenX, screenY) {
         const sx = screenX !== undefined ? screenX : mousePos.x;
         const sy = screenY !== undefined ? screenY : mousePos.y;
@@ -625,7 +670,7 @@
         path.id = edge.id; path.setAttribute('class', 'connection');
         path.addEventListener('contextmenu', (e) => {
             e.preventDefault(); 
-            openModal({title:'Удалить связь?', confirmText:'Да', onConfirm:()=>{
+            openModal({title:'Delete Connection?', confirmText:'Delete', onConfirm:()=>{
                 recordAction(); edges = edges.filter(x=>x.id!==edge.id); path.remove(); saveCurrentSpaceData();
             }});
         });
@@ -652,7 +697,7 @@
         return {x,y};
     }
 
-    // --- TASK & FILES ---
+    // --- 7. TASKS & FILES HANDLING ---
     window.toggleTask = function(btn) { btn.parentElement.classList.toggle('done'); saveNodeState(btn); };
     window.addTaskRow = function(btn) {
         const row = document.createElement('div'); row.className = 'task-row';
@@ -668,26 +713,28 @@
             if(node) { node.content = contentEl.innerHTML; saveCurrentSpaceData(); }
         }
     }
+    
     function openMediaModal(type) {
         openModal({
-            title: type==='image'?'Картинка':'Видео',
-            extraHtml: `<button class="btn primary" onclick="triggerFile('${type}')" style="width:100%; padding:10px; margin-bottom:10px;">Загрузить файл</button><div style="text-align:center; color:#888;">Или ссылка:</div>`,
+            title: type==='image'?'Add Image':'Add Video',
+            extraHtml: `<button class="btn primary" onclick="triggerFile('${type}')" style="width:100%; padding:14px; margin-bottom:15px;">📂 Upload File</button><div style="text-align:center; color:#888; margin-bottom:10px;">OR Paste Link:</div>`,
             inputPlaceholder: 'https://...',
             onConfirm: (url) => {
                 if(url) {
                     const c = getWorldMousePosition();
-                    if(type==='image') createNode(c.x-150, c.y-100, 'image', 'Img', `<img src="${url}">`);
+                    if(type==='image') createNode(c.x-150, c.y-100, 'image', 'Image', `<img src="${url}">`);
                     else createVideoNode(c.x-150, c.y-100, url);
                 }
             }
         });
     }
+    
     function triggerFile(type) { closeModal(); fileInput.setAttribute('accept', type==='image'?'image/*':'video/*'); fileInput.click(); fileInput.onchange = e => { const f=e.target.files[0]; if(f) handleFile(f,type); fileInput.value=''; }; }
-    function handleFile(f, t, c) { if(!c) c=getWorldMousePosition(window.innerWidth/2+100, window.innerHeight/2); const r = new FileReader(); r.onload = e => createNode(c.x, c.y, t, t==='image'?'Img':'Video', t==='image'?`<img src="${e.target.result}">`:`<video src="${e.target.result}" controls></video>`); r.readAsDataURL(f); }
+    function handleFile(f, t, c) { if(!c) c=getWorldMousePosition(window.innerWidth/2+100, window.innerHeight/2); const r = new FileReader(); r.onload = e => createNode(c.x, c.y, t, t==='image'?'Image':'Video', t==='image'?`<img src="${e.target.result}">`:`<video src="${e.target.result}" controls></video>`); r.readAsDataURL(f); }
     function createVideoNode(x, y, url) { const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/); const c = yt ? `<iframe src="https://www.youtube.com/embed/${yt[1]}" allowfullscreen></iframe>` : `<video src="${url}" controls></video>`; createNode(x, y, 'video', 'Video', c); }
-    function openLinkModal() { openModal({ title: 'Ссылка', inputPlaceholder: 'https://...', onConfirm: (u) => { if(u) createNode(getWorldMousePosition().x-130, getWorldMousePosition().y-50, 'link', 'Link', `<a href="${u}" target="_blank">${u}</a>`); } }); }
+    function openLinkModal() { openModal({ title: 'Add Link', inputPlaceholder: 'https://...', onConfirm: (u) => { if(u) createNode(getWorldMousePosition().x-130, getWorldMousePosition().y-50, 'link', 'Link', `<a href="${u}" target="_blank">${u}</a>`); } }); }
 
-    // --- MODAL & SPACES ---
+    // --- 8. MODAL & SPACES ---
     function openModal({ title, message, inputPlaceholder, inputValue, confirmText='OK', onConfirm, extraHtml='' }) {
         modalTitle.innerText = title; modalMsg.innerText = message||''; modalMsg.style.display = message?'block':'none'; modalBody.innerHTML = extraHtml;
         let inputEl = null;
@@ -716,31 +763,27 @@
         });
     }
     function switchSpace(name) { if(name === currentSpace) return; saveCurrentSpaceData(); currentSpace = name; localStorage.setItem('ob_currentSpace', name); loadSpaceData(name); renderSpacesSidebar(); }
-    function openCreateSpaceModal() { openModal({ title: 'Новое пространство', inputPlaceholder: 'Название...', onConfirm: (n) => { if(n&&!spaces.includes(n)){ saveCurrentSpaceData(); spaces.push(n); localStorage.setItem('ob_spaces',JSON.stringify(spaces)); switchSpace(n); } } }); }
-    function openRenameSpaceModal(old) { openModal({ title: 'Переименовать', inputPlaceholder: 'Новое имя', inputValue: old, onConfirm: (n) => { if(n&&n!==old&&!spaces.includes(n)){ saveCurrentSpaceData(); const d=localStorage.getItem(`ob_space_${old}`); if(d){localStorage.setItem(`ob_space_${n}`,d); localStorage.removeItem(`ob_space_${old}`);} spaces[spaces.indexOf(old)]=n; localStorage.setItem('ob_spaces',JSON.stringify(spaces)); if(currentSpace===old){currentSpace=n; localStorage.setItem('ob_currentSpace',n);} renderSpacesSidebar(); } } }); }
-    function confirmDeleteSpace(n) { openModal({ title: 'Удалить?', message: `Удалить "${n}"?`, confirmText: 'Удалить', onConfirm: () => { spaces=spaces.filter(s=>s!==n); localStorage.removeItem(`ob_space_${n}`); localStorage.setItem('ob_spaces',JSON.stringify(spaces)); if(currentSpace===n) switchSpace(spaces[0]); else renderSpacesSidebar(); } }); }
-    function confirmClearCanvas() { openModal({ title: 'Очистить всё?', confirmText: 'Да', onConfirm: () => { recordAction(); nodes=[]; edges=[]; renderAll(); saveCurrentSpaceData(); } }); }
+    function openCreateSpaceModal() { openModal({ title: 'New Space', inputPlaceholder: 'Name...', onConfirm: (n) => { if(n&&!spaces.includes(n)){ saveCurrentSpaceData(); spaces.push(n); localStorage.setItem('ob_spaces',JSON.stringify(spaces)); switchSpace(n); } } }); }
+    function openRenameSpaceModal(old) { openModal({ title: 'Rename Space', inputPlaceholder: 'New Name', inputValue: old, onConfirm: (n) => { if(n&&n!==old&&!spaces.includes(n)){ saveCurrentSpaceData(); const d=localStorage.getItem(`ob_space_${old}`); if(d){localStorage.setItem(`ob_space_${n}`,d); localStorage.removeItem(`ob_space_${old}`);} spaces[spaces.indexOf(old)]=n; localStorage.setItem('ob_spaces',JSON.stringify(spaces)); if(currentSpace===old){currentSpace=n; localStorage.setItem('ob_currentSpace',n);} renderSpacesSidebar(); } } }); }
+    function confirmDeleteSpace(n) { openModal({ title: 'Delete Space?', message: `Are you sure you want to delete "${n}"?`, confirmText: 'Delete', onConfirm: () => { spaces=spaces.filter(s=>s!==n); localStorage.removeItem(`ob_space_${n}`); localStorage.setItem('ob_spaces',JSON.stringify(spaces)); if(currentSpace===n) switchSpace(spaces[0]); else renderSpacesSidebar(); } }); }
+    function confirmClearCanvas() { openModal({ title: 'Clear Canvas?', confirmText: 'Clear', onConfirm: () => { recordAction(); nodes=[]; edges=[]; renderAll(); saveCurrentSpaceData(); } }); }
     
     function downloadBackup() { saveCurrentSpaceData(); const d={}; Object.keys(localStorage).forEach(k=>{if(k.startsWith('ob_'))d[k]=localStorage.getItem(k)}); const b=new Blob([JSON.stringify(d)],{type:'application/json'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=`backup-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(u); }
     function triggerRestore() { backupInput.click(); }
-    backupInput.onchange = e => { const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=ev=>{ try{const d=JSON.parse(ev.target.result); if(!d.ob_spaces)throw 1; Object.keys(localStorage).forEach(k=>{if(k.startsWith('ob_'))localStorage.removeItem(k)}); Object.keys(d).forEach(k=>localStorage.setItem(k,d[k])); location.reload(); }catch(e){alert('Ошибка бэкапа');} }; r.readAsText(f); backupInput.value=''; };
+    backupInput.onchange = e => { const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=ev=>{ try{const d=JSON.parse(ev.target.result); if(!d.ob_spaces)throw 1; Object.keys(localStorage).forEach(k=>{if(k.startsWith('ob_'))localStorage.removeItem(k)}); Object.keys(d).forEach(k=>localStorage.setItem(k,d[k])); location.reload(); }catch(e){alert('Backup Error');} }; r.readAsText(f); backupInput.value=''; };
 
-    // --- SELECTION & DELETE ---
+    // --- 9. SELECTION & STYLE ---
     function selectNode(n) { selectedNodeId=n.id; document.querySelectorAll('.node').forEach(x=>x.classList.remove('selected')); document.getElementById(n.id)?.classList.add('selected'); updateStyleMenu(); }
     function deselectNode() { selectedNodeId=null; document.querySelectorAll('.node').forEach(x=>x.classList.remove('selected')); styleMenu.style.display='none'; }
     function deleteSelectedNode() { if(selectedNodeId){ recordAction(); nodes=nodes.filter(n=>n.id!==selectedNodeId); edges=edges.filter(e=>e.from!==selectedNodeId&&e.to!==selectedNodeId); deselectNode(); renderAll(); saveCurrentSpaceData(); } }
     function updateStyleMenu() {
         if(!selectedNodeId) { styleMenu.style.display='none'; return; }
         const el = document.getElementById(selectedNodeId);
-        if(el) { const r = el.getBoundingClientRect(); styleMenu.style.display = 'flex'; styleMenu.style.left = (r.left + r.width/2) + 'px'; styleMenu.style.top = (r.top - 50) + 'px'; }
+        if(el) { const r = el.getBoundingClientRect(); styleMenu.style.display = 'flex'; styleMenu.style.left = (r.left + r.width/2) + 'px'; styleMenu.style.top = (r.top - 60) + 'px'; }
     }
     function applyStyle(prop, val) { if(selectedNodeId) { const n=nodes.find(x=>x.id===selectedNodeId); recordAction(); n[prop]=val; renderAll(); selectNode(n); saveCurrentSpaceData(); } }
     
-    // --- HISTORY & ZOOM ---
-    function recordAction() { if(historyStack.length>30) historyStack.shift(); historyStack.push(JSON.stringify({nodes, edges, idCounter})); }
-    window.addEventListener('keydown', e => { if((e.key==='Delete'||e.key==='Backspace')&&!e.target.isContentEditable&&e.target.tagName!=='INPUT') deleteSelectedNode(); if((e.ctrlKey||e.metaKey)&&e.key==='z') undo(); });
-    function undo() { if(historyStack.length){ const d=JSON.parse(historyStack.pop()); nodes=d.nodes; edges=d.edges; idCounter=d.idCounter; deselectNode(); renderAll(); saveCurrentSpaceData(); } }
-    function updateTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; }
+    function updateTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; world.style.backgroundPosition = `${-state.panX/state.scale}px ${-state.panY/state.scale}px`; }
     viewport.addEventListener('wheel', (e) => { e.preventDefault(); const d = e.deltaY > 0 ? 0.9 : 1.1; state.scale = Math.min(Math.max(0.1, state.scale * d), 5); updateTransform(); updateStyleMenu(); }, {passive:false});
 
     init();
