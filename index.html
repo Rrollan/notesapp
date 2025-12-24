@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquid Canvas: Full Power</title>
+    <title>Liquid Canvas: Full Logic</title>
+    <!-- Шрифт Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -17,71 +18,75 @@
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-            background-color: #F2F4F8; /* Светлый фон под стеклом */
+            background-color: #F5F7FA;
             font-family: 'Inter', sans-serif;
             color: var(--text-primary);
             user-select: none;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 1. ФОН: LIQUID LAVA (Сложная анимация) --- */
+        /* --- 1. ФОН (ANIMATED LIQUID) --- */
         .mesh-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2;
-            background: #F2F4F8; overflow: hidden;
+            background: #ffffff;
+            overflow: hidden;
         }
         .mesh-blob {
             position: absolute; border-radius: 50%;
-            filter: blur(80px); opacity: 0.8;
+            filter: blur(60px); 
+            opacity: 0.9;
             will-change: transform;
-            animation: float 25s infinite cubic-bezier(0.4, 0, 0.2, 1) alternate;
+            animation: float 20s infinite ease-in-out alternate;
+            mix-blend-mode: multiply;
         }
-        /* Цвета подобраны для красивого преломления */
-        .b1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #8EC5FC; animation-delay: 0s; } /* Blue */
-        .b2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: #E0C3FC; animation-delay: -5s; } /* Purple */
-        .b3 { top: 30%; left: 40%; width: 40vw; height: 40vw; background: #FFDEE9; opacity: 0.7; animation-delay: -10s; } /* Pink */
-        .b4 { bottom: 10%; left: 10%; width: 35vw; height: 35vw; background: #B5FFFC; opacity: 0.6; animation-delay: -15s; } /* Cyan */
+        
+        /* Яркие цвета для эффекта преломления */
+        .b1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #A0C4FF; animation-duration: 25s; }
+        .b2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: #FFADAD; animation-duration: 30s; }
+        .b3 { top: 30%; left: 40%; width: 45vw; height: 45vw; background: #FDFFB6; animation-duration: 22s; }
+        .b4 { bottom: 10%; left: 10%; width: 40vw; height: 40vw; background: #CAFFBF; animation-duration: 28s; }
 
         @keyframes float {
             0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            33% { transform: translate(30px, 50px) scale(1.1) rotate(10deg); }
-            66% { transform: translate(-20px, 20px) scale(0.9) rotate(-5deg); }
-            100% { transform: translate(10px, -30px) scale(1.05) rotate(5deg); }
+            50% { transform: translate(40px, 20px) scale(1.1) rotate(5deg); }
+            100% { transform: translate(-30px, 40px) scale(0.9) rotate(-5deg); }
         }
 
-        /* --- 2. СТИЛЬ LIQUID GLASS (ОБЪЕМ И ИСКАЖЕНИЕ) --- */
+        /* --- 2. СТИЛЬ LIQUID GLASS --- */
         .liquid-glass {
             position: relative; isolation: isolate; border-radius: inherit;
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s;
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        /* Блик и объем */
         .liquid-glass::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             border-radius: inherit; pointer-events: none;
-            box-shadow: 
-                inset 0 0 20px rgba(255, 255, 255, 0.5), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.9),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.15) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.4); 
+            /* Внутренний свет */
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255, 255, 255, 0.6);
             z-index: 0;
         }
-        /* Искажение */
         .liquid-glass::after {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             border-radius: inherit; pointer-events: none;
-            backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%);
-            filter: url(#liquid-glass-filter); -webkit-filter: url(#liquid-glass-filter);
-            z-index: -1; opacity: 0.9;
-        }
-        /* Fallback для старых браузеров */
-        .liquid-glass-fallback {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(25px) saturate(150%);
-            border: 1px solid rgba(255,255,255,0.6);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(15px) saturate(160%);
+            -webkit-backdrop-filter: blur(15px) saturate(160%);
+            /* Искажение через SVG */
+            filter: url(#liquid-glass-filter);
+            -webkit-filter: url(#liquid-glass-filter);
+            z-index: -1;
         }
 
-        /* --- 3. UI: AUTO-HIDE (Выплывающие панели) --- */
+        .liquid-glass-fallback {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(30px) saturate(150%);
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .glass-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; }
+
+        /* --- 3. AUTO-HIDE PANELS --- */
         .trigger-zone { position: fixed; z-index: 1999; }
         .trigger-left { top: 0; left: 0; width: 20px; height: 100%; }
         .trigger-top { top: 0; left: 0; width: 100%; height: 20px; }
@@ -90,35 +95,57 @@
             position: fixed; top: 20px; bottom: 20px; left: 20px;
             width: var(--sidebar-width); z-index: 2000;
             transform: translateX(calc(-100% - 40px)); opacity: 0;
-            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .trigger-left:hover ~ #sidebar-container, #sidebar-container:hover { transform: translateX(0); opacity: 1; }
 
-        #sidebar { width: 100%; height: 100%; display: flex; flex-direction: column; border-radius: 32px; box-shadow: 0 25px 60px rgba(0,0,0,0.15); }
-        .glass-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; }
+        #sidebar { width: 100%; height: 100%; border-radius: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
 
         #toolbar-container {
             position: fixed; top: 20px; left: 0; right: 0; 
             display: flex; justify-content: center; z-index: 2000; pointer-events: none;
             transform: translateY(-150%); opacity: 0;
-            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .trigger-top:hover ~ #toolbar-container, #toolbar-container:hover { transform: translateY(0); opacity: 1; }
 
-        .toolbar-wrap { display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: auto; }
-        .toolbar { padding: 10px 14px; border-radius: 24px; display: flex; gap: 10px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+        .toolbar-wrap { display: flex; flex-direction: column; gap: 12px; align-items: center; pointer-events: auto; }
+        .toolbar { padding: 10px 16px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+        .toolbar-inner { display: flex; gap: 10px; align-items: center; }
 
-        /* Элементы внутри UI */
+        /* --- 4. МЕНЮ СТИЛЕЙ (Исправлено) --- */
+        #style-menu {
+            position: absolute; display: none; z-index: 3000; 
+            padding: 8px 12px; border-radius: 100px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            transform: translate(-50%, -130%);
+            width: max-content; 
+            white-space: nowrap;
+        }
+        .style-menu-inner { display: flex; flex-direction: row; align-items: center; gap: 12px; }
+        .color-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; flex-shrink: 0;}
+        .color-btn:hover { transform: scale(1.2); }
+
+        /* UI Elements */
+        .btn {
+            background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.4); 
+            color: #111; padding: 10px 18px; border-radius: 14px; cursor: pointer; 
+            font-size: 0.95rem; font-weight: 500; transition: 0.2s; white-space: nowrap;
+        }
+        .btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .btn.primary { background: #fff; color: #000; font-weight: 600; }
+        .btn.danger { color: var(--accent-red); }
+
         .sidebar-header { padding: 30px 25px 20px; font-weight: 800; font-size: 1.4rem; color: #000; }
-        .sidebar-hint { font-size: 0.8rem; color: #666; padding: 0 25px 20px; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 10px; }
+        .sidebar-hint { font-size: 0.8rem; color: #666; padding: 0 25px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 10px; }
         .space-list { flex-grow: 1; overflow-y: auto; padding: 0 15px; }
         .space-item {
             padding: 12px 18px; margin-bottom: 6px; border-radius: 16px; cursor: pointer;
             display: flex; justify-content: space-between; align-items: center;
             color: #444; transition: 0.2s; font-weight: 500;
         }
-        .space-item:hover { background: rgba(255,255,255,0.5); color: #000; transform: scale(1.02); }
-        .space-item.active { background: #fff; color: var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .space-item:hover { background: rgba(255,255,255,0.6); color: #000; }
+        .space-item.active { background: #fff; color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .space-del { opacity: 0; color: var(--accent-red); font-weight: bold; }
         .space-item:hover .space-del { opacity: 1; }
 
@@ -128,83 +155,57 @@
             cursor: pointer; transition: 0.2s; font-weight: 600; text-align: center;
         }
         .add-space-btn:hover { background: #fff; border-color: var(--accent); color: var(--accent); }
-
         .backup-section { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 8px; }
-        .backup-btn { background: rgba(255,255,255,0.5); border: none; padding: 12px; border-radius: 14px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition:0.2s; }
-        .backup-btn:hover { background: #fff; transform: translateY(-2px); }
+        .backup-btn { background: rgba(255,255,255,0.5); border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 0.85rem; transition:0.2s; }
+        .backup-btn:hover { background: #fff; }
 
-        .btn {
-            background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.3); 
-            color: #111; padding: 10px 20px; border-radius: 16px; cursor: pointer; 
-            font-size: 0.95rem; transition: 0.2s; font-weight: 500;
-        }
-        .btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .btn.primary { background: #fff; color: #000; font-weight: 600; }
-        .btn.danger { color: var(--accent-red); }
-
-        /* --- CANVAS --- */
+        /* Canvas & Nodes */
         #viewport { position: absolute; top:0; left: 0; width: 100%; height: 100%; cursor: grab; overflow: hidden; }
         #viewport:active { cursor: grabbing; }
         #world { position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform; }
-
         #connections-layer { position: absolute; top: -50000px; left: -50000px; width: 100000px; height: 100000px; pointer-events: none; z-index: 0; }
         path.connection { fill: none; stroke: rgba(0,0,0,0.2); stroke-width: 2px; pointer-events: stroke; transition: stroke 0.2s; stroke-linecap: round; }
-        path.connection.temp { stroke-dasharray: 6,6; opacity: 0.6; stroke: var(--accent); }
         path.connection:hover { stroke: var(--accent); stroke-width: 4px; cursor: pointer; }
 
-        /* --- NODES (Liquid Cards) --- */
+        /* Карточки */
         .node {
             position: absolute; min-width: 260px;
             border-radius: 28px;
             display: flex; flex-direction: column; z-index: 1; box-sizing: border-box; 
-            transition: box-shadow 0.3s, transform 0.2s;
-            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.2);
+            transition: box-shadow 0.2s, transform 0.1s;
+            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.3);
         }
-        .node:hover { box-shadow: 0 35px 80px -15px rgba(0,0,0,0.2); transform: translateY(-2px); z-index: 10; }
+        .node:hover { box-shadow: 0 30px 80px -15px rgba(0,0,0,0.15); transform: translateY(-2px); z-index: 10; }
         .node.selected { box-shadow: 0 0 0 3px var(--accent), 0 30px 70px rgba(0,0,0,0.2); z-index: 20; }
         
-        /* Node Colors */
         .node.color-red .node-header { background: rgba(255, 59, 48, 0.1); color: #d63031; }
         .node.color-green .node-header { background: rgba(52, 199, 89, 0.1); color: #27ae60; }
         .node.color-blue .node-header { background: rgba(0, 122, 255, 0.1); color: #0984e3; }
         .node.color-yellow .node-header { background: rgba(255, 204, 0, 0.15); color: #d35400; }
-        
-        .node-wrapper { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; }
 
+        .node-wrapper { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; }
         .node-header {
             padding: 18px 24px; font-weight: 600; font-size: 1rem;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            border-radius: 28px 28px 0 0; cursor: grab;
-            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.06); border-radius: 28px 28px 0 0;
+            cursor: grab; display: flex; justify-content: space-between; align-items: center;
         }
-        .header-text { outline: none; border-bottom: 1px solid transparent; max-width: 85%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .header-text { outline: none; border-bottom: 1px solid transparent; max-width: 85%; overflow: hidden; white-space: nowrap; }
         .header-text:focus { border-bottom: 1px solid var(--accent); }
-
-        .node-content {
-            padding: 24px; font-size: 1rem; line-height: 1.6; outline: none;
-            color: #1d1d1f; word-break: break-word; cursor: text; flex-grow: 1;
-        }
+        .node-content { padding: 24px; font-size: 1rem; line-height: 1.6; outline: none; color: #1d1d1f; cursor: text; flex-grow: 1; }
         
         .content-img, .content-video { padding: 0; display: flex; justify-content: center; background: rgba(0,0,0,0.03); border-radius: 0 0 28px 28px; overflow: hidden; }
         .content-img img { width: 100%; height: auto; display: block; pointer-events: none; }
         .content-video iframe, .content-video video { width: 100%; height: 100%; min-height: 200px; border: none; }
-        
-        /* Resizer & Handles */
-        .resizer {
-            position: absolute; right: 0; bottom: 0; width: 25px; height: 25px; z-index: 20;
-            cursor: se-resize; opacity: 0; transition: opacity 0.2s;
-        }
+
+        .resizer { position: absolute; right: 0; bottom: 0; width: 25px; height: 25px; z-index: 20; cursor: se-resize; opacity: 0; }
         .resizer::after { content: ''; position: absolute; right: 8px; bottom: 8px; width: 8px; height: 8px; border-right: 2px solid #999; border-bottom: 2px solid #999; border-radius: 2px; }
         .node:hover .resizer { opacity: 1; }
-
+        
         .handle {
             position: absolute; width: 24px; height: 24px; background: transparent; cursor: crosshair; z-index: 30;
             display: flex; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s;
         }
-        .handle::after { 
-            content: ''; width: 10px; height: 10px; background: #fff; border-radius: 50%; 
-            border: 2px solid var(--accent); transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+        .handle::after { content: ''; width: 10px; height: 10px; background: #fff; border-radius: 50%; border: 2px solid var(--accent); transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .node:hover .handle, .handle.snap-active { opacity: 1; }
         .handle:hover::after { transform: scale(1.4); background: var(--accent); border-color: #fff;}
         .h-top { top: -12px; left: 50%; transform: translateX(-50%); }
@@ -213,28 +214,18 @@
         .h-left { left: -12px; top: 50%; transform: translateY(-50%); }
 
         /* Tasks */
-        .task-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; padding: 5px; border-radius: 8px; transition: 0.2s; }
+        .task-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; padding: 5px; border-radius: 8px; }
         .task-row:hover { background: rgba(0,0,0,0.03); }
         .task-check { width: 20px; height: 20px; min-width: 20px; border: 2px solid #bbb; border-radius: 6px; cursor: pointer; position: relative; margin-top: 2px; background: rgba(255,255,255,0.5);}
-        .task-input { background: transparent; border: none; color: #333; font-size: 1rem; width: 100%; outline: none; font-family: 'Inter', sans-serif;}
+        .task-input { background: transparent; border: none; color: #333; font-size: 1rem; width: 100%; outline: none; }
         .task-date { background: rgba(0,0,0,0.05); border: none; color: #777; font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; cursor: pointer; }
         .task-row.done { opacity: 0.6; }
         .task-row.done .task-check { background: var(--accent-green); border-color: var(--accent-green); }
         .task-row.done .task-input { text-decoration: line-through; }
-        .add-task-btn { width: 100%; padding: 10px; background: rgba(255,255,255,0.4); border: 1px dashed #ccc; color: #888; border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 0.9rem;}
+        .add-task-btn { width: 100%; padding: 10px; background: rgba(255,255,255,0.4); border: 1px dashed #ccc; color: #888; border-radius: 12px; cursor: pointer; font-size: 0.9rem;}
         .add-task-btn:hover { border-color: var(--accent); color: var(--accent); background: #fff; }
 
-        /* Style Menu */
-        #style-menu {
-            position: absolute; display: none; z-index: 2000; 
-            padding: 10px 14px; border-radius: 50px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
-            gap: 10px; align-items: center; transform: translate(-50%, -150%);
-        }
-        .color-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
-        .color-btn:hover { transform: scale(1.2); }
-
-        /* Modals */
+        /* Modal */
         #modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.01); backdrop-filter: blur(10px);
@@ -242,27 +233,22 @@
         }
         #modal-box {
             width: 380px; padding: 40px; border-radius: 36px;
-            box-shadow: 0 40px 120px rgba(0,0,0,0.25);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.25);
             display: flex; flex-direction: column; gap: 20px;
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes popIn { from { transform: scale(0.9) translateY(30px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
-        
         #modal-title { margin: 0; color: #000; font-size: 1.4rem; font-weight: 700; text-align: center; }
-        #modal-message { font-size: 1rem; color: #555; line-height: 1.5; text-align: center;}
-        .modal-input {
-            background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.1); color: #333;
-            padding: 16px; border-radius: 16px; outline: none; width: 100%; box-sizing: border-box; font-size: 1.1rem;
-        }
-        .modal-input:focus { background: #fff; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0,122,255,0.1); }
+        .modal-input { background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.1); color: #333; padding: 16px; border-radius: 16px; outline: none; width: 100%; box-sizing: border-box; font-size: 1.1rem; }
+        .modal-input:focus { background: #fff; border-color: var(--accent); }
         .modal-actions { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
-        
+
         #hidden-file-input, #backup-file-input { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- SVG FILTER: Секрет искажения (Distortion) -->
+    <!-- SVG FILTER (Искажение стекла) -->
     <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position: absolute; overflow: hidden;">
       <defs>
         <filter id="liquid-glass-filter" x="-20%" y="-20%" width="140%" height="140%">
@@ -273,7 +259,7 @@
       </defs>
     </svg>
 
-    <!-- BACKGROUND -->
+    <!-- ФОН (Lava Blobs) -->
     <div class="mesh-bg">
         <div class="mesh-blob b1"></div>
         <div class="mesh-blob b2"></div>
@@ -284,11 +270,11 @@
     <input type="file" id="hidden-file-input" multiple>
     <input type="file" id="backup-file-input" accept=".json">
 
-    <!-- TRIGGERS FOR AUTO-HIDE -->
+    <!-- Триггеры для появления панелей -->
     <div class="trigger-zone trigger-left"></div>
     <div class="trigger-zone trigger-top"></div>
 
-    <!-- SIDEBAR WRAPPER -->
+    <!-- SIDEBAR -->
     <div id="sidebar-container">
         <div id="sidebar" class="liquid-glass">
             <div class="glass-content">
@@ -297,18 +283,18 @@
                 <div class="space-list" id="space-list"></div>
                 <div class="add-space-btn" onclick="openCreateSpaceModal()">+ New Space</div>
                 <div class="backup-section">
-                    <button class="backup-btn" onclick="downloadBackup()">↓ Download Backup</button>
-                    <button class="backup-btn restore" onclick="triggerRestore()">↑ Restore Backup</button>
+                    <button class="backup-btn" onclick="downloadBackup()">↓ Backup</button>
+                    <button class="backup-btn restore" onclick="triggerRestore()">↑ Restore</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- TOOLBAR WRAPPER -->
+    <!-- TOOLBAR -->
     <div id="toolbar-container">
         <div class="toolbar-wrap">
             <div class="toolbar liquid-glass">
-                <div class="glass-content" style="display:flex; gap:10px;">
+                <div class="glass-content toolbar-inner">
                     <button class="btn primary" onclick="spawnNode('text')">Text</button>
                     <button class="btn" onclick="openMediaModal('image')">Image</button>
                     <button class="btn" onclick="openMediaModal('video')">Video</button>
@@ -317,31 +303,31 @@
                 </div>
             </div>
             <div class="toolbar liquid-glass">
-                <div class="glass-content">
+                <div class="glass-content toolbar-inner">
                     <button class="btn danger" onclick="confirmClearCanvas()">Clear All</button>
-                    <span style="font-size: 11px; color:#666; align-self: center; margin-left:10px;">Ctrl+Z: Undo | Ctrl+V: Paste</span>
+                    <span style="font-size: 11px; color:#666; margin-left:5px;">Ctrl+Z (Undo)</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- STYLE MENU -->
+    <!-- МЕНЮ СТИЛЕЙ (ГОРИЗОНТАЛЬНОЕ) -->
     <div id="style-menu" class="liquid-glass">
-        <div class="glass-content" style="display:flex; gap:10px; align-items:center;">
+        <div class="glass-content style-menu-inner">
             <div class="color-btn" style="background:#fff;" onclick="applyStyle('color', 'default')"></div>
             <div class="color-btn" style="background:#ff3b30;" onclick="applyStyle('color', 'red')"></div>
             <div class="color-btn" style="background:#34c759;" onclick="applyStyle('color', 'green')"></div>
             <div class="color-btn" style="background:#007aff;" onclick="applyStyle('color', 'blue')"></div>
             <div class="color-btn" style="background:#ff9500;" onclick="applyStyle('color', 'yellow')"></div>
-            <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.1); margin: 0 4px;"></div>
-            <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="applyStyle('shape', 'default')">Rect</button>
-            <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="applyStyle('shape', 'round')">Round</button>
-            <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.1); margin: 0 4px;"></div>
-            <button class="btn danger" style="padding: 4px 10px; font-size: 12px; font-weight:bold;" onclick="deleteSelectedNode()">✕</button>
+            <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.1);"></div>
+            <button class="btn" style="padding: 6px 10px; font-size: 11px;" onclick="applyStyle('shape', 'default')">Rect</button>
+            <button class="btn" style="padding: 6px 10px; font-size: 11px;" onclick="applyStyle('shape', 'round')">Round</button>
+            <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.1);"></div>
+            <button class="btn danger" style="padding: 6px 10px; font-size: 12px; font-weight:bold;" onclick="deleteSelectedNode()">✕</button>
         </div>
     </div>
 
-    <!-- UNIFIED MODAL -->
+    <!-- MODAL -->
     <div id="modal-overlay">
         <div id="modal-box" class="liquid-glass">
             <div class="glass-content">
@@ -369,21 +355,20 @@
     </div>
 
 <script>
-    // --- 0. BROWSER CHECK FOR LIQUID EFFECT ---
+    // --- 0. ПРОВЕРКА БРАУЗЕРА (ДЛЯ СТЕКЛА) ---
     (function() {
       const ua = navigator.userAgent.toLowerCase();
       const isChromium = ua.includes('chrome') || ua.includes('edg') || ua.includes('opr');
       window.getGlassClass = function() {
           return isChromium ? 'liquid-glass' : 'liquid-glass-fallback';
       }
-      // Apply correct class to static elements
       const els = document.querySelectorAll('.liquid-glass');
       els.forEach(el => {
           if(!isChromium) { el.classList.remove('liquid-glass'); el.classList.add('liquid-glass-fallback'); }
       });
     })();
 
-    // --- 1. CORE VARIABLES & INIT ---
+    // --- 1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
     let spaces = JSON.parse(localStorage.getItem('ob_spaces')) || ['Main'];
     let currentSpace = localStorage.getItem('ob_currentSpace') || 'Main';
     const SVG_OFFSET = 50000;
@@ -395,7 +380,7 @@
     const backupInput = document.getElementById('backup-file-input');
     const styleMenu = document.getElementById('style-menu');
     
-    // Modal Elements
+    // Элементы модального окна
     const modal = document.getElementById('modal-overlay');
     const modalTitle = document.getElementById('modal-title');
     const modalMsg = document.getElementById('modal-message');
@@ -406,7 +391,7 @@
     let nodes = [];
     let edges = [];
     let idCounter = 1;
-    let historyStack = []; // For Undo
+    let historyStack = [];
     let selectedNodeId = null;
 
     let dragObj = null; 
@@ -414,6 +399,7 @@
     let tempLine = null;
     let mousePos = { x: window.innerWidth/2, y: window.innerHeight/2 }; 
 
+    // --- ИНИЦИАЛИЗАЦИЯ ---
     function init() {
         renderSpacesSidebar();
         loadSpaceData(currentSpace);
@@ -421,7 +407,7 @@
         updateTransform();
     }
 
-    // --- 2. PARALLAX BACKGROUND ---
+    // --- 2. ЭФФЕКТ ПАРАЛЛАКСА (Движение фона) ---
     document.addEventListener('mousemove', (e) => {
         const xPercent = (e.clientX / window.innerWidth - 0.5);
         const yPercent = (e.clientY / window.innerHeight - 0.5);
@@ -431,7 +417,7 @@
         });
     });
 
-    // --- 3. DATA & HISTORY ---
+    // --- 3. ИСТОРИЯ И ДАННЫЕ (UNDE/REDO) ---
     function recordAction() {
         if(historyStack.length > 40) historyStack.shift();
         historyStack.push(JSON.stringify({nodes, edges, idCounter}));
@@ -458,12 +444,12 @@
         } else {
             nodes = []; edges = []; idCounter = 1;
             state = { scale: 1, panX: window.innerWidth/2, panY: window.innerHeight/2 };
-            addNodeData({ x: 50, y: 50, type: 'text', title: 'Start', content: 'Welcome to Liquid Canvas' });
+            addNodeData({ x: 50, y: 50, type: 'text', title: 'Start', content: 'Liquid Canvas' });
         }
         historyStack = []; deselectNode(); renderAll(); updateTransform();
     }
-
-    // --- 4. NODE LOGIC ---
+    
+    // --- 4. СОЗДАНИЕ НОД (КАРТОЧЕК) ---
     function addNodeData(data) {
         recordAction();
         const id = data.id || ('node-' + idCounter++);
@@ -477,10 +463,10 @@
         const cx = c.x - 130; 
         const cy = c.y - 50;
         if (type === 'task') {
-            const taskHtml = `<div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" value="Task Item" oninput="saveNodeState(this)"><input type="date" class="task-date" onchange="saveNodeState(this)"></div><button class="add-task-btn" onclick="addTaskRow(this)">+ Add Item</button>`;
-            createNode(cx, cy, 'task', 'To-Do List', taskHtml);
+            const taskHtml = `<div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" value="Task" oninput="saveNodeState(this)"><input type="date" class="task-date" onchange="saveNodeState(this)"></div><button class="add-task-btn" onclick="addTaskRow(this)">+ Add</button>`;
+            createNode(cx, cy, 'task', 'To-Do', taskHtml);
         } else {
-            createNode(cx, cy, 'text', 'Note', 'Your text here...');
+            createNode(cx, cy, 'text', 'Note', 'Text...');
         }
     }
 
@@ -498,7 +484,7 @@
     function createNodeDOM(node) {
         const el = document.createElement('div');
         el.id = node.id;
-        // DYNAMIC CLASS FOR LIQUID EFFECT
+        // ДИНАМИЧЕСКИЙ КЛАСС (СТЕКЛО)
         el.className = `node ${window.getGlassClass()} type-${node.type} color-${node.color} shape-${node.shape}`;
         if(node.id === selectedNodeId) el.classList.add('selected');
         el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; el.style.width = node.width + 'px';
@@ -510,7 +496,7 @@
             contentHtml = `<div class="node-content" ${node.type==='text'?'contenteditable="true"':''}>${node.content}</div>`;
         }
 
-        // WRAPPER DIV for z-index layering over distortion
+        // ОБЕРТКА (WRAPPER) ДЛЯ Z-INDEX ПОВЕРХ ИСКАЖЕНИЯ
         el.innerHTML = `
             <div class="node-wrapper">
                 <div class="node-header"><span class="header-text">${node.title}</span></div>
@@ -558,7 +544,7 @@
         });
     }
 
-    // --- 5. INTERACTION & EVENTS ---
+    // --- 5. ВЗАИМОДЕЙСТВИЕ (МЫШЬ) ---
     window.addEventListener('mousedown', (e) => {
         if(e.target.closest('#style-menu') || e.target.closest('.node') || e.target.closest('#modal-box') || e.target.closest('#sidebar') || e.target.closest('.toolbar')) return;
         if(e.target === viewport || e.target === world) {
@@ -617,7 +603,7 @@
         }
     });
 
-    // --- PASTE SUPPORT (Вернул) ---
+    // --- PASTE SUPPORT ---
     window.addEventListener('paste', (e) => {
         if(e.target.isContentEditable || e.target.tagName === 'INPUT') return;
         e.preventDefault();
@@ -638,13 +624,13 @@
         }
     });
 
-    // --- SHORTCUTS (Delete, Undo) ---
+    // --- SHORTCUTS ---
     window.addEventListener('keydown', (e) => {
         if((e.key === 'Delete' || e.key === 'Backspace') && !e.target.isContentEditable && e.target.tagName !== 'INPUT') deleteSelectedNode();
         if((e.ctrlKey||e.metaKey) && e.key==='z') undo();
     });
 
-    // --- 6. UTILS & HELPERS ---
+    // --- 6. МАТЕМАТИКА И УТИЛИТЫ ---
     function getWorldMousePosition(screenX, screenY) {
         const sx = screenX !== undefined ? screenX : mousePos.x;
         const sy = screenY !== undefined ? screenY : mousePos.y;
@@ -670,7 +656,7 @@
         path.id = edge.id; path.setAttribute('class', 'connection');
         path.addEventListener('contextmenu', (e) => {
             e.preventDefault(); 
-            openModal({title:'Delete Connection?', confirmText:'Delete', onConfirm:()=>{
+            openModal({title:'Delete?', confirmText:'Delete', onConfirm:()=>{
                 recordAction(); edges = edges.filter(x=>x.id!==edge.id); path.remove(); saveCurrentSpaceData();
             }});
         });
@@ -697,12 +683,18 @@
         return {x,y};
     }
 
-    // --- 7. TASKS & FILES HANDLING ---
-    window.toggleTask = function(btn) { btn.parentElement.classList.toggle('done'); saveNodeState(btn); };
+    // --- 7. ЗАДАЧИ И ФАЙЛЫ ---
+    window.toggleTask = function(btn) { 
+        btn.parentElement.classList.toggle('done'); 
+        saveNodeState(btn); 
+    };
     window.addTaskRow = function(btn) {
-        const row = document.createElement('div'); row.className = 'task-row';
-        row.innerHTML = `<div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" value="" oninput="saveNodeState(this)"><input type="date" class="task-date" onchange="saveNodeState(this)">`;
-        btn.before(row); row.querySelector('.task-input').focus(); saveNodeState(btn);
+        const row = document.createElement('div'); 
+        row.className = 'task-row';
+        row.innerHTML = `<div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" oninput="saveNodeState(this)"><input type="date" class="task-date" onchange="saveNodeState(this)">`;
+        btn.before(row); 
+        row.querySelector('.task-input').focus(); 
+        saveNodeState(btn);
     };
     window.saveNodeState = function(el) {
         const nEl = el.closest('.node');
@@ -717,7 +709,7 @@
     function openMediaModal(type) {
         openModal({
             title: type==='image'?'Add Image':'Add Video',
-            extraHtml: `<button class="btn primary" onclick="triggerFile('${type}')" style="width:100%; padding:14px; margin-bottom:15px;">📂 Upload File</button><div style="text-align:center; color:#888; margin-bottom:10px;">OR Paste Link:</div>`,
+            extraHtml: `<button class="btn primary" onclick="triggerFile('${type}')" style="width:100%; padding:14px; margin-bottom:15px;">Upload</button><div style="text-align:center; color:#888; margin-bottom:10px;">OR Link:</div>`,
             inputPlaceholder: 'https://...',
             onConfirm: (url) => {
                 if(url) {
@@ -734,7 +726,7 @@
     function createVideoNode(x, y, url) { const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/); const c = yt ? `<iframe src="https://www.youtube.com/embed/${yt[1]}" allowfullscreen></iframe>` : `<video src="${url}" controls></video>`; createNode(x, y, 'video', 'Video', c); }
     function openLinkModal() { openModal({ title: 'Add Link', inputPlaceholder: 'https://...', onConfirm: (u) => { if(u) createNode(getWorldMousePosition().x-130, getWorldMousePosition().y-50, 'link', 'Link', `<a href="${u}" target="_blank">${u}</a>`); } }); }
 
-    // --- 8. MODAL & SPACES ---
+    // --- 8. МОДАЛКИ И ПРОСТРАНСТВА ---
     function openModal({ title, message, inputPlaceholder, inputValue, confirmText='OK', onConfirm, extraHtml='' }) {
         modalTitle.innerText = title; modalMsg.innerText = message||''; modalMsg.style.display = message?'block':'none'; modalBody.innerHTML = extraHtml;
         let inputEl = null;
@@ -772,20 +764,48 @@
     function triggerRestore() { backupInput.click(); }
     backupInput.onchange = e => { const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=ev=>{ try{const d=JSON.parse(ev.target.result); if(!d.ob_spaces)throw 1; Object.keys(localStorage).forEach(k=>{if(k.startsWith('ob_'))localStorage.removeItem(k)}); Object.keys(d).forEach(k=>localStorage.setItem(k,d[k])); location.reload(); }catch(e){alert('Backup Error');} }; r.readAsText(f); backupInput.value=''; };
 
-    // --- 9. SELECTION & STYLE ---
+    // --- 9. ВЫБОР И СТИЛИ ---
     function selectNode(n) { selectedNodeId=n.id; document.querySelectorAll('.node').forEach(x=>x.classList.remove('selected')); document.getElementById(n.id)?.classList.add('selected'); updateStyleMenu(); }
     function deselectNode() { selectedNodeId=null; document.querySelectorAll('.node').forEach(x=>x.classList.remove('selected')); styleMenu.style.display='none'; }
     function deleteSelectedNode() { if(selectedNodeId){ recordAction(); nodes=nodes.filter(n=>n.id!==selectedNodeId); edges=edges.filter(e=>e.from!==selectedNodeId&&e.to!==selectedNodeId); deselectNode(); renderAll(); saveCurrentSpaceData(); } }
+    
     function updateStyleMenu() {
         if(!selectedNodeId) { styleMenu.style.display='none'; return; }
         const el = document.getElementById(selectedNodeId);
-        if(el) { const r = el.getBoundingClientRect(); styleMenu.style.display = 'flex'; styleMenu.style.left = (r.left + r.width/2) + 'px'; styleMenu.style.top = (r.top - 60) + 'px'; }
+        if(el) { 
+            const r = el.getBoundingClientRect(); 
+            styleMenu.style.display = 'flex'; 
+            styleMenu.style.left = (r.left + r.width/2) + 'px'; 
+            styleMenu.style.top = (r.top - 60) + 'px'; 
+        }
     }
-    function applyStyle(prop, val) { if(selectedNodeId) { const n=nodes.find(x=>x.id===selectedNodeId); recordAction(); n[prop]=val; renderAll(); selectNode(n); saveCurrentSpaceData(); } }
     
-    function updateTransform() { world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; world.style.backgroundPosition = `${-state.panX/state.scale}px ${-state.panY/state.scale}px`; }
-    viewport.addEventListener('wheel', (e) => { e.preventDefault(); const d = e.deltaY > 0 ? 0.9 : 1.1; state.scale = Math.min(Math.max(0.1, state.scale * d), 5); updateTransform(); updateStyleMenu(); }, {passive:false});
+    function applyStyle(prop, val) { 
+        if(selectedNodeId) { 
+            const n = nodes.find(x => x.id === selectedNodeId); 
+            recordAction(); 
+            n[prop] = val; 
+            renderAll(); 
+            selectNode(n); 
+            saveCurrentSpaceData(); 
+        } 
+    }
+    
+    // --- 10. ТРАНСФОРМАЦИЯ И СКРОЛЛ ---
+    function updateTransform() { 
+        world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; 
+        world.style.backgroundPosition = `${-state.panX/state.scale}px ${-state.panY/state.scale}px`; 
+    }
+    
+    viewport.addEventListener('wheel', (e) => { 
+        e.preventDefault(); 
+        const d = e.deltaY > 0 ? 0.9 : 1.1; 
+        state.scale = Math.min(Math.max(0.1, state.scale * d), 5); 
+        updateTransform(); 
+        updateStyleMenu(); 
+    }, {passive:false});
 
+    // START
     init();
 </script>
 </body>
