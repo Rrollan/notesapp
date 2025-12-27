@@ -2,826 +2,810 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Liquid Canvas: Miro Style</title>
-    <!-- Шрифт Inter для чистоты интерфейса -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Canvas: Dot Grid & Glass</title>
+    <!-- Шрифт Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #F4F5F7;
-            --dot-color: #C5C6C9;
+            --text-primary: #1d1d1f;
             --accent: #007AFF;
-            --accent-danger: #FF3B30;
-            --sidebar-width: 260px;
-            --glass-border: rgba(255, 255, 255, 0.6);
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            --accent-green: #34C759;
+            --accent-red: #FF3B30;
+            --accent-orange: #FF9500;
+            --sidebar-width: 280px;
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-            background-color: var(--bg-color);
+            background-color: #F5F7FA;
             font-family: 'Inter', sans-serif;
-            color: #1d1d1f;
+            color: var(--text-primary);
             user-select: none;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* --- 1. БЕСКОНЕЧНЫЙ ХОЛСТ С ТОЧКАМИ --- */
-        #viewport {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            overflow: hidden; cursor: grab;
-            z-index: 0;
-        }
-        #viewport:active { cursor: grabbing; }
-
+        /* --- 1. ФОН: ТОЧКИ (DOT GRID) --- */
+        /* Применяем фон к #world, чтобы точки масштабировались вместе с контентом */
         #world {
-            position: absolute; top: 0; left: 0;
-            width: 0; height: 0; /* Размеры не важны, важен transform */
-            transform-origin: 0 0;
+            position: absolute; top: 0; left: 0; 
+            transform-origin: 0 0; 
             will-change: transform;
+            width: 100000px; /* Делаем очень большим */
+            height: 100000px;
+            
+            /* Генерация точек через градиент */
+            background-color: #f4f4f7; /* Основной цвет фона */
+            background-image: radial-gradient(circle, #b0b0b5 1.5px, transparent 1.5px);
+            background-size: 24px 24px; /* Расстояние между точками */
         }
 
-        /* Оптимизированная сетка - применяется к псевдоэлементу фона, чтобы не дергалась */
-        .grid-background {
-            position: fixed; top: -50000px; left: -50000px;
-            width: 100000px; height: 100000px;
-            background-color: var(--bg-color);
-            background-image: radial-gradient(circle, var(--dot-color) 1.5px, transparent 1.5px);
-            background-size: 24px 24px; /* Размер клетки */
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* --- 2. ЭФФЕКТ LIQUID GLASS (ИСПРАВЛЕННЫЙ) --- */
+        /* --- 2. СТИЛЬ LIQUID GLASS (ИЗ ВАШЕГО ПРИМЕРА) --- */
         .liquid-glass {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
             position: relative;
-            z-index: 10;
+            isolation: isolate;
+            border-radius: inherit; /* Наследуем скругление от родителя */
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        
-        /* Добавляем "шум" и легкое искажение только на фон, чтобы текст был четким */
+
         .liquid-glass::before {
-            content: ''; position: absolute; inset: 0; 
-            border-radius: inherit; pointer-events: none; z-index: -1;
-            opacity: 0.4;
-            /* Более мягкий фильтр */
-            filter: url(#liquid-filter); 
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            /* Специфичная тень из вашего примера */
+            box-shadow: inset 0 0 39px 0px #c2c2c2; 
+            background-color: rgba(255, 255, 255, 0.03);
+            z-index: 0;
+            border: 1px solid rgba(255, 255, 255, 0.4); /* Небольшая обводка для четкости */
         }
 
-        /* --- 3. UI: САЙДБАР И ТУЛБАР --- */
-        #ui-layer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 1000;
+        .liquid-glass::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            /* Ссылка на SVG фильтр */
+            filter: url(#liquid-glass-filter);
+            -webkit-filter: url(#liquid-glass-filter);
+            isolation: isolate;
+            z-index: -1;
         }
 
-        /* Сайдбар */
-        #sidebar {
-            position: absolute; top: 20px; left: 20px; bottom: 20px;
-            width: var(--sidebar-width);
-            border-radius: 24px;
-            display: flex; flex-direction: column;
-            pointer-events: auto;
-            transition: transform 0.3s ease, opacity 0.3s;
+        /* Фоллбэк для браузеров без поддержки */
+        .liquid-glass-fallback {
+            position: relative;
+            isolation: isolate;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        /* Сворачивание сайдбара влево */
-        #sidebar.collapsed { transform: translateX(calc(-100% - 30px)); opacity: 0.5; }
-        
-        /* Триггер зона для показа сайдбара */
-        .sidebar-trigger {
-            position: absolute; top: 0; left: 0; width: 20px; height: 100%;
-            pointer-events: auto; z-index: 1001;
-        }
-        .sidebar-trigger:hover ~ #ui-layer #sidebar { transform: translateX(0); opacity: 1; }
 
-        .sidebar-header {
-            padding: 24px; font-weight: 800; font-size: 1.2rem;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; align-items: center;
+        .glass-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; }
+
+        /* --- 3. UI ПАНЕЛИ --- */
+        .trigger-zone { position: fixed; z-index: 1999; }
+        .trigger-left { top: 0; left: 0; width: 20px; height: 100%; }
+        .trigger-top { top: 0; left: 0; width: 100%; height: 20px; }
+
+        #sidebar-container {
+            position: fixed; top: 20px; bottom: 20px; left: 20px;
+            width: var(--sidebar-width); z-index: 2000;
+            transform: translateX(calc(-100% - 40px)); opacity: 0;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .space-list { flex: 1; overflow-y: auto; padding: 10px 16px; }
-        
+        .trigger-left:hover ~ #sidebar-container, #sidebar-container:hover { transform: translateX(0); opacity: 1; }
+
+        #sidebar { width: 100%; height: 100%; border-radius: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+
+        #toolbar-container {
+            position: fixed; top: 20px; left: 0; right: 0; 
+            display: flex; justify-content: center; z-index: 2000; pointer-events: none;
+            transform: translateY(-150%); opacity: 0;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .trigger-top:hover ~ #toolbar-container, #toolbar-container:hover { transform: translateY(0); opacity: 1; }
+
+        .toolbar-wrap { display: flex; flex-direction: column; gap: 12px; align-items: center; pointer-events: auto; }
+        .toolbar { padding: 10px 16px; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+        .toolbar-inner { display: flex; gap: 10px; align-items: center; }
+
+        /* UI Elements */
+        .btn {
+            background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.4); 
+            color: #111; padding: 10px 18px; border-radius: 14px; cursor: pointer; 
+            font-size: 0.95rem; font-weight: 500; transition: 0.2s; white-space: nowrap;
+        }
+        .btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .btn.primary { background: #fff; color: #000; font-weight: 600; }
+        .btn.danger { color: var(--accent-red); }
+
+        .sidebar-header { padding: 30px 25px 20px; font-weight: 800; font-size: 1.4rem; color: #000; }
+        .sidebar-hint { font-size: 0.8rem; color: #666; padding: 0 25px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); margin-bottom: 10px; }
+        .space-list { flex-grow: 1; overflow-y: auto; padding: 0 15px; }
         .space-item {
-            padding: 10px 14px; margin-bottom: 4px; border-radius: 12px; cursor: pointer;
-            font-size: 0.95rem; font-weight: 500; color: #555;
-            display: flex; justify-content: space-between; transition: 0.2s;
+            padding: 12px 18px; margin-bottom: 6px; border-radius: 16px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            color: #444; transition: 0.2s; font-weight: 500;
         }
-        .space-item:hover { background: rgba(255,255,255,0.5); color: #000; }
-        .space-item.active { background: #fff; color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .space-del { opacity: 0; color: var(--accent-danger); font-weight: bold; padding: 0 5px;}
+        .space-item:hover { background: rgba(255,255,255,0.6); color: #000; }
+        .space-item.active { background: #fff; color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .space-del { opacity: 0; color: var(--accent-red); font-weight: bold; }
         .space-item:hover .space-del { opacity: 1; }
 
-        .sidebar-footer { padding: 20px; border-top: 1px solid rgba(0,0,0,0.05); }
-        .btn-full { width: 100%; padding: 12px; border-radius: 14px; border: 1px dashed #999; background: rgba(255,255,255,0.3); cursor: pointer; font-weight: 600; color: #444; transition: 0.2s; }
-        .btn-full:hover { background: #fff; border-color: var(--accent); color: var(--accent); }
-        .backup-row { display: flex; gap: 8px; margin-top: 10px; }
-        .btn-small { flex: 1; padding: 8px; border-radius: 10px; border: none; background: rgba(255,255,255,0.5); cursor: pointer; font-size: 0.8rem; transition: 0.2s; }
-        .btn-small:hover { background: #fff; transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
-        /* Тулбар (вверху) */
-        #toolbar {
-            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 8px; padding: 6px;
-            border-radius: 20px;
-            pointer-events: auto;
-            transition: transform 0.3s;
+        .add-space-btn {
+            background: rgba(255,255,255,0.4); border: 1px dashed rgba(0,0,0,0.2); 
+            color: #555; margin: 10px 20px 25px; padding: 14px; border-radius: 18px; 
+            cursor: pointer; transition: 0.2s; font-weight: 600; text-align: center;
         }
-        #toolbar:hover { transform: translateX(-50%) translateY(2px); }
+        .add-space-btn:hover { background: #fff; border-color: var(--accent); color: var(--accent); }
+        .backup-section { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 8px; }
+        .backup-btn { background: rgba(255,255,255,0.5); border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 0.85rem; transition:0.2s; }
+        .backup-btn:hover { background: #fff; }
 
-        .tool-btn {
-            border: none; background: transparent; padding: 10px 16px;
-            border-radius: 14px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
-            color: #333; transition: 0.2s; display: flex; align-items: center; gap: 6px;
+        /* --- 4. МЕНЮ СТИЛЕЙ --- */
+        #style-menu {
+            position: absolute; display: none; z-index: 3000; 
+            padding: 8px 12px; border-radius: 100px;
+            /* Меню стилей тоже делаем стеклянным, но без сильного искажения, чтобы не мылило кнопки */
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            transform: translate(-50%, -130%);
+            width: max-content; 
+            white-space: nowrap;
         }
-        .tool-btn:hover { background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .tool-btn.primary { background: #fff; color: #000; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .tool-btn.danger { color: var(--accent-danger); }
-        .tool-btn.danger:hover { background: #FFF0F0; }
+        .style-menu-inner { display: flex; flex-direction: row; align-items: center; gap: 12px; }
+        .color-btn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; flex-shrink: 0;}
+        .color-btn:hover { transform: scale(1.2); }
 
-        /* --- 4. НОДЫ (КАРТОЧКИ) --- */
-        .node {
-            position: absolute; 
-            min-width: 240px; 
-            border-radius: 20px;
-            /* Стекло для самих карточек */
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.5);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            
-            display: flex; flex-direction: column;
-            transition: box-shadow 0.2s, transform 0.1s;
-        }
-        .node:hover { box-shadow: 0 15px 40px rgba(0,0,0,0.12); z-index: 100 !important; }
-        .node.selected { 
-            box-shadow: 0 0 0 2px var(--accent), 0 20px 50px rgba(0,0,0,0.15); 
-            z-index: 101 !important; 
-        }
-
-        /* Цветовые стили */
-        .node.color-yellow { background: rgba(255, 250, 230, 0.9); }
-        .node.color-blue { background: rgba(235, 245, 255, 0.9); }
-        .node.color-green { background: rgba(235, 255, 240, 0.9); }
-        .node.color-red { background: rgba(255, 240, 240, 0.9); }
+        /* Canvas & Nodes */
+        #viewport { position: absolute; top:0; left: 0; width: 100%; height: 100%; cursor: grab; overflow: hidden; }
+        #viewport:active { cursor: grabbing; }
         
-        .node.shape-round { border-radius: 32px; }
-
-        .node-header {
-            padding: 14px 20px;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            font-weight: 600; font-size: 0.95rem; cursor: grab;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .node-header:active { cursor: grabbing; }
-        .node-title { outline: none; min-width: 50px; }
-        .node-content {
-            padding: 20px; font-size: 1rem; line-height: 1.5; color: #333; outline: none; min-height: 40px; cursor: text;
-        }
-        
-        /* Медиа контент */
-        .node-media { padding: 0; border-radius: 0 0 20px 20px; overflow: hidden; display: flex; background: rgba(0,0,0,0.03); }
-        .node-media img { width: 100%; height: auto; display: block; }
-        .node-media iframe, .node-media video { width: 100%; height: 100%; min-height: 200px; border: none; }
-
-        /* Элементы управления (Handle & Resizer) */
-        .resizer { position: absolute; right: 0; bottom: 0; width: 20px; height: 20px; cursor: se-resize; opacity: 0; }
-        .node:hover .resizer { opacity: 1; }
-        .resizer::after { content: ''; position: absolute; bottom: 6px; right: 6px; width: 6px; height: 6px; border-right: 2px solid #aaa; border-bottom: 2px solid #aaa; }
-
-        .handle {
-            position: absolute; width: 12px; height: 12px; background: #fff; border: 2px solid var(--accent); border-radius: 50%;
-            z-index: 200; cursor: crosshair; opacity: 0; transition: 0.2s;
-        }
-        .node:hover .handle { opacity: 1; }
-        .handle:hover { transform: scale(1.5); background: var(--accent); }
-        .h-top { top: -8px; left: 50%; transform: translateX(-50%); }
-        .h-right { right: -8px; top: 50%; transform: translateY(-50%); }
-        .h-bottom { bottom: -8px; left: 50%; transform: translateX(-50%); }
-        .h-left { left: -8px; top: 50%; transform: translateY(-50%); }
-
-        /* --- 5. ЗАДАЧИ --- */
-        .task-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-        .task-check { 
-            width: 18px; height: 18px; border: 2px solid #ccc; border-radius: 6px; 
-            cursor: pointer; margin-top: 3px; flex-shrink: 0; transition: 0.2s;
-            background: #fff;
-        }
-        .task-row.done .task-check { background: var(--accent-green); border-color: var(--accent-green); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 5 L4 8 L9 2' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E"); }
-        .task-row.done input { text-decoration: line-through; opacity: 0.6; }
-        .task-input { border: none; background: transparent; flex: 1; font-size: 1rem; outline: none; }
-        .task-add { color: var(--accent); font-size: 0.85rem; cursor: pointer; padding: 5px 0; font-weight: 500;}
-
-        /* --- 6. SVG СВЯЗИ --- */
-        #connections-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: -1;
-        }
-        path.connection {
-            fill: none; stroke: #C5C6C9; stroke-width: 2px; pointer-events: stroke; transition: stroke 0.2s; stroke-linecap: round;
-        }
+        #connections-layer { position: absolute; top: -50000px; left: -50000px; width: 100000px; height: 100000px; pointer-events: none; z-index: 0; }
+        path.connection { fill: none; stroke: rgba(0,0,0,0.2); stroke-width: 2px; pointer-events: stroke; transition: stroke 0.2s; stroke-linecap: round; }
         path.connection:hover { stroke: var(--accent); stroke-width: 4px; cursor: pointer; }
 
-        /* --- 7. КОНТЕКСТНОЕ МЕНЮ СТИЛЕЙ --- */
-        #context-menu {
-            position: fixed; display: none; z-index: 2000;
-            background: #fff; padding: 6px; border-radius: 50px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            gap: 8px; align-items: center;
+        /* Карточки */
+        .node {
+            position: absolute; min-width: 260px;
+            /* border-radius наследуется liquid-glass, здесь ставим базу */
+            border-radius: 28px;
+            display: flex; flex-direction: column; z-index: 1; box-sizing: border-box; 
+            transition: box-shadow 0.2s, transform 0.1s;
+            /* Тень для самих карточек */
+            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.1);
         }
-        .color-dot { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); transition: transform 0.2s;}
-        .color-dot:hover { transform: scale(1.2); }
-        .sep { width: 1px; height: 16px; background: #eee; }
+        .node:hover { box-shadow: 0 30px 80px -15px rgba(0,0,0,0.15); transform: translateY(-2px); z-index: 10; }
+        .node.selected { box-shadow: 0 0 0 3px var(--accent), 0 30px 70px rgba(0,0,0,0.2); z-index: 20; }
+        
+        /* Цветовые акценты (применяются к Header внутри стекла) */
+        .node.color-red .node-header { background: rgba(255, 59, 48, 0.15); color: #d63031; }
+        .node.color-green .node-header { background: rgba(52, 199, 89, 0.15); color: #27ae60; }
+        .node.color-blue .node-header { background: rgba(0, 122, 255, 0.15); color: #0984e3; }
+        .node.color-yellow .node-header { background: rgba(255, 204, 0, 0.2); color: #d35400; }
 
-        /* --- 8. МОДАЛКИ --- */
+        .node-wrapper { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; }
+        .node-header {
+            padding: 18px 24px; font-weight: 600; font-size: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.06); border-radius: 28px 28px 0 0;
+            cursor: grab; display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-text { outline: none; border-bottom: 1px solid transparent; max-width: 85%; overflow: hidden; white-space: nowrap; }
+        .header-text:focus { border-bottom: 1px solid var(--accent); }
+        .node-content { padding: 24px; font-size: 1rem; line-height: 1.6; outline: none; color: #1d1d1f; cursor: text; flex-grow: 1; }
+        
+        .content-img, .content-video { padding: 0; display: flex; justify-content: center; background: rgba(0,0,0,0.03); border-radius: 0 0 28px 28px; overflow: hidden; }
+        .content-img img { width: 100%; height: auto; display: block; pointer-events: none; }
+        .content-video iframe, .content-video video { width: 100%; height: 100%; min-height: 200px; border: none; }
+
+        .resizer { position: absolute; right: 0; bottom: 0; width: 25px; height: 25px; z-index: 20; cursor: se-resize; opacity: 0; }
+        .resizer::after { content: ''; position: absolute; right: 8px; bottom: 8px; width: 8px; height: 8px; border-right: 2px solid #555; border-bottom: 2px solid #555; border-radius: 2px; }
+        .node:hover .resizer { opacity: 1; }
+        
+        .handle {
+            position: absolute; width: 24px; height: 24px; background: transparent; cursor: crosshair; z-index: 30;
+            display: flex; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s;
+        }
+        .handle::after { content: ''; width: 10px; height: 10px; background: #fff; border-radius: 50%; border: 2px solid var(--accent); transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .node:hover .handle, .handle.snap-active { opacity: 1; }
+        .handle:hover::after { transform: scale(1.4); background: var(--accent); border-color: #fff;}
+        .h-top { top: -12px; left: 50%; transform: translateX(-50%); }
+        .h-right { right: -12px; top: 50%; transform: translateY(-50%); }
+        .h-bottom { bottom: -12px; left: 50%; transform: translateX(-50%); }
+        .h-left { left: -12px; top: 50%; transform: translateY(-50%); }
+
+        /* Tasks */
+        .task-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; padding: 5px; border-radius: 8px; }
+        .task-row:hover { background: rgba(0,0,0,0.03); }
+        .task-check { width: 20px; height: 20px; min-width: 20px; border: 2px solid #888; border-radius: 6px; cursor: pointer; position: relative; margin-top: 2px; background: rgba(255,255,255,0.5);}
+        .task-input { background: transparent; border: none; color: #333; font-size: 1rem; width: 100%; outline: none; }
+        .task-date { background: rgba(0,0,0,0.05); border: none; color: #777; font-size: 0.8rem; padding: 4px 8px; border-radius: 6px; cursor: pointer; }
+        .task-row.done { opacity: 0.6; }
+        .task-row.done .task-check { background: var(--accent-green); border-color: var(--accent-green); }
+        .task-row.done .task-input { text-decoration: line-through; }
+        .add-task-btn { width: 100%; padding: 10px; background: rgba(255,255,255,0.4); border: 1px dashed #999; color: #555; border-radius: 12px; cursor: pointer; font-size: 0.9rem;}
+        .add-task-btn:hover { border-color: var(--accent); color: var(--accent); background: #fff; }
+
+        /* Modal */
         #modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.2); backdrop-filter: blur(5px);
             z-index: 5000; display: none; justify-content: center; align-items: center;
         }
-        .modal-box {
-            background: #fff; padding: 30px; border-radius: 24px; width: 340px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        #modal-box {
+            width: 380px; padding: 40px; border-radius: 36px;
+            /* Тоже стекло */
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.25);
+            display: flex; flex-direction: column; gap: 20px;
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        @keyframes popIn { from{ transform: scale(0.9) translateY(20px); opacity:0;} to{transform: scale(1) translateY(0); opacity:1;} }
-        .modal-input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 10px; font-size: 1rem; box-sizing: border-box;}
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
-        
-        /* Скрытые инпуты */
-        input[type="file"] { display: none; }
+        @keyframes popIn { from { transform: scale(0.9) translateY(30px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+        #modal-title { margin: 0; color: #000; font-size: 1.4rem; font-weight: 700; text-align: center; }
+        .modal-input { background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.1); color: #333; padding: 16px; border-radius: 16px; outline: none; width: 100%; box-sizing: border-box; font-size: 1.1rem; }
+        .modal-input:focus { background: #fff; border-color: var(--accent); }
+        .modal-actions { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
+
+        #hidden-file-input, #backup-file-input { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- SVG ФИЛЬТР: Исправленные параметры для мягкого эффекта -->
-    <svg style="display: none;">
+    <!-- SVG FILTER (Обновлен под ваш запрос: seed=92, scale=52, stdDeviation=2) -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position: absolute; overflow: hidden;">
       <defs>
-        <filter id="liquid-filter" x="0%" y="0%" width="100%" height="100%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.01 0.01" numOctaves="1" result="warp" />
-          <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="15" in="SourceGraphic" in2="warp" />
+        <filter id="liquid-glass-filter" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.005 0.005" numOctaves="2" seed="92" result="noise" />
+          <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
+          <feDisplacementMap in="SourceGraphic" in2="blurred" scale="52" xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </defs>
     </svg>
 
-    <div class="sidebar-trigger"></div>
+    <input type="file" id="hidden-file-input" multiple>
+    <input type="file" id="backup-file-input" accept=".json">
 
-    <div id="ui-layer">
-        <!-- SIDEBAR -->
+    <!-- Триггеры для появления панелей -->
+    <div class="trigger-zone trigger-left"></div>
+    <div class="trigger-zone trigger-top"></div>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar-container">
         <div id="sidebar" class="liquid-glass">
-            <div class="sidebar-header">
-                <span>Liquid Canvas</span>
-                <span style="font-size:10px; color:#666; font-weight:400;">v2.0</span>
-            </div>
-            <div class="space-list" id="space-list">
-                <!-- Пространства генерируются JS -->
-            </div>
-            <div class="sidebar-footer">
-                <button class="btn-full" onclick="openCreateSpaceModal()">+ New Space</button>
-                <div class="backup-row">
-                    <button class="btn-small" onclick="downloadBackup()">↓ Save</button>
-                    <button class="btn-small" onclick="triggerRestore()">↑ Load</button>
+            <div class="glass-content">
+                <div class="sidebar-header">Liquid Canvas</div>
+                <div class="sidebar-hint">Auto-hide Enabled</div>
+                <div class="space-list" id="space-list"></div>
+                <div class="add-space-btn" onclick="openCreateSpaceModal()">+ New Space</div>
+                <div class="backup-section">
+                    <button class="backup-btn" onclick="downloadBackup()">↓ Backup</button>
+                    <button class="backup-btn restore" onclick="triggerRestore()">↑ Restore</button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- TOOLBAR -->
-        <div id="toolbar" class="liquid-glass">
-            <button class="tool-btn primary" onclick="spawnNode('text')"><span>T</span> Text</button>
-            <button class="tool-btn" onclick="openMediaModal('image')">Image</button>
-            <button class="tool-btn" onclick="spawnNode('task')">Tasks</button>
-            <button class="tool-btn" onclick="spawnNode('link')">Link</button>
-            <div style="width:1px; background:rgba(0,0,0,0.1); margin: 0 4px;"></div>
-            <button class="tool-btn danger" onclick="confirmClearCanvas()">Clear</button>
+    <!-- TOOLBAR -->
+    <div id="toolbar-container">
+        <div class="toolbar-wrap">
+            <div class="toolbar liquid-glass">
+                <div class="glass-content toolbar-inner">
+                    <button class="btn primary" onclick="spawnNode('text')">Text</button>
+                    <button class="btn" onclick="openMediaModal('image')">Image</button>
+                    <button class="btn" onclick="openMediaModal('video')">Video</button>
+                    <button class="btn" onclick="spawnNode('task')">Tasks</button>
+                    <button class="btn" onclick="openLinkModal()">Link</button>
+                </div>
+            </div>
+            <div class="toolbar liquid-glass">
+                <div class="glass-content toolbar-inner">
+                    <button class="btn danger" onclick="confirmClearCanvas()">Clear All</button>
+                    <span style="font-size: 11px; color:#666; margin-left:5px;">Ctrl+Z</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- CONTEXT MENU (появляется над выделенной нодой) -->
-    <div id="context-menu">
-        <div class="color-dot" style="background:#fff;" onclick="applyStyle('color', 'default')"></div>
-        <div class="color-dot" style="background:#fff9c4;" onclick="applyStyle('color', 'yellow')"></div>
-        <div class="color-dot" style="background:#e3f2fd;" onclick="applyStyle('color', 'blue')"></div>
-        <div class="color-dot" style="background:#e8f5e9;" onclick="applyStyle('color', 'green')"></div>
-        <div class="color-dot" style="background:#ffebee;" onclick="applyStyle('color', 'red')"></div>
-        <div class="sep"></div>
-        <button class="tool-btn" style="padding:4px 8px; font-size:11px;" onclick="applyStyle('shape', 'round')">Round</button>
-        <div class="sep"></div>
-        <button class="tool-btn danger" style="padding:4px 8px; font-size:12px;" onclick="deleteSelectedNode()">✕</button>
-    </div>
-
-    <!-- MAIN CANVAS -->
-    <div id="viewport">
-        <div id="world">
-             <!-- Фоновая сетка внутри world, чтобы двигалась вместе с зумом, но позиционировалась через JS -->
-            <div class="grid-background" id="grid-bg"></div>
-            
-            <svg id="connections-layer" xmlns="http://www.w3.org/2000/svg">
-                <!-- Связи рисуются здесь -->
-            </svg>
-            <!-- Ноды добавляются сюда -->
+    <!-- МЕНЮ СТИЛЕЙ -->
+    <div id="style-menu">
+        <div class="style-menu-inner">
+            <div class="color-btn" style="background:#fff;" onclick="applyStyle('color', 'default')"></div>
+            <div class="color-btn" style="background:#ff3b30;" onclick="applyStyle('color', 'red')"></div>
+            <div class="color-btn" style="background:#34c759;" onclick="applyStyle('color', 'green')"></div>
+            <div class="color-btn" style="background:#007aff;" onclick="applyStyle('color', 'blue')"></div>
+            <div class="color-btn" style="background:#ff9500;" onclick="applyStyle('color', 'yellow')"></div>
+            <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.1);"></div>
+            <button class="btn" style="padding: 6px 10px; font-size: 11px;" onclick="applyStyle('shape', 'default')">Rect</button>
+            <button class="btn" style="padding: 6px 10px; font-size: 11px;" onclick="applyStyle('shape', 'round')">Round</button>
+            <div style="width: 1px; height: 16px; background: rgba(0,0,0,0.1);"></div>
+            <button class="btn danger" style="padding: 6px 10px; font-size: 12px; font-weight:bold;" onclick="deleteSelectedNode()">✕</button>
         </div>
     </div>
 
     <!-- MODAL -->
     <div id="modal-overlay">
-        <div class="modal-box">
-            <h3 id="modal-title" style="margin-top:0;">Title</h3>
+        <div id="modal-box">
+            <h3 id="modal-title">Title</h3>
+            <div id="modal-message" style="display:none;"></div>
             <div id="modal-body"></div>
             <div class="modal-actions">
-                <button class="btn-small" onclick="closeModal()">Cancel</button>
-                <button id="modal-confirm-btn" class="tool-btn primary">OK</button>
+                <button class="btn" onclick="closeModal()">Cancel</button>
+                <button id="modal-confirm-btn" class="btn primary">Confirm</button>
             </div>
         </div>
     </div>
 
-    <input type="file" id="file-input">
+    <div id="viewport">
+        <!-- ФОН и КОНТЕНТ ВНУТРИ WORLD -->
+        <div id="world">
+            <svg id="connections-layer" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <marker id="arrowhead" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b0b0b5" />
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+    </div>
 
-    <script>
-        // --- CORE STATE ---
-        let state = {
-            scale: 1,
-            panX: window.innerWidth / 2, // Центрируем начало координат
-            panY: window.innerHeight / 2,
-            isDragging: false,
-            startX: 0, startY: 0
-        };
-        
-        let nodes = [];
-        let edges = [];
-        let idCounter = 1;
-        let spaces = JSON.parse(localStorage.getItem('lc_spaces')) || ['Main Board'];
-        let currentSpace = localStorage.getItem('lc_currentSpace') || 'Main Board';
-        let selectedNodeId = null;
+<script>
+    // --- 0. ПРОВЕРКА БРАУЗЕРА (ДЛЯ СТЕКЛА) ---
+    (function() {
+      const ua = navigator.userAgent.toLowerCase();
+      const isChromium = ua.includes('chrome') || ua.includes('edg') || ua.includes('opr') || ua.includes('opera');
+      window.getGlassClass = function() {
+          // Если не Chromium, даем fallback класс
+          return isChromium ? 'liquid-glass' : 'liquid-glass-fallback';
+      }
+      
+      const els = document.querySelectorAll('.liquid-glass');
+      els.forEach(el => {
+          if(!isChromium) { el.classList.remove('liquid-glass'); el.classList.add('liquid-glass-fallback'); }
+      });
+      
+      if(!isChromium) {
+          // Также меняем стили для сайдбара и тулбара если браузер не поддерживает
+          document.documentElement.style.setProperty('--glass-bg', 'rgba(255,255,255,0.9)');
+      }
+    })();
 
-        // Элементы DOM
-        const world = document.getElementById('world');
-        const viewport = document.getElementById('viewport');
-        const svgLayer = document.getElementById('connections-layer');
-        const contextMenu = document.getElementById('context-menu');
-        const fileInput = document.getElementById('file-input');
+    // --- 1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
+    let spaces = JSON.parse(localStorage.getItem('ob_spaces')) || ['Main'];
+    let currentSpace = localStorage.getItem('ob_currentSpace') || 'Main';
+    const SVG_OFFSET = 50000;
 
-        // --- INIT ---
-        function init() {
-            loadSpace(currentSpace);
-            renderSidebar();
-            updateTransform();
-            
-            // Обработчики событий мира
-            viewport.addEventListener('mousedown', onPointerDown);
-            window.addEventListener('mousemove', onPointerMove);
-            window.addEventListener('mouseup', onPointerUp);
-            viewport.addEventListener('wheel', onWheel, {passive: false});
-            
-            // Клавиши
-            window.addEventListener('keydown', (e) => {
-                if((e.key === 'Delete' || e.key === 'Backspace') && !e.target.closest('input') && !e.target.isContentEditable) deleteSelectedNode();
-                if((e.ctrlKey || e.metaKey) && e.key === 'z') undo(); // Простой placeholder для undo
-            });
+    const viewport = document.getElementById('viewport');
+    const world = document.getElementById('world');
+    const svgLayer = document.getElementById('connections-layer');
+    const fileInput = document.getElementById('hidden-file-input');
+    const backupInput = document.getElementById('backup-file-input');
+    const styleMenu = document.getElementById('style-menu');
+    
+    // Элементы модального окна
+    const modal = document.getElementById('modal-overlay');
+    const modalTitle = document.getElementById('modal-title');
+    const modalMsg = document.getElementById('modal-message');
+    const modalBody = document.getElementById('modal-body');
+    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+
+    let state = { scale: 1, panX: window.innerWidth/2, panY: window.innerHeight/2 };
+    let nodes = [];
+    let edges = [];
+    let idCounter = 1;
+    let historyStack = [];
+    let selectedNodeId = null;
+
+    let dragObj = null; 
+    let connectStart = null; 
+    let tempLine = null;
+    let mousePos = { x: window.innerWidth/2, y: window.innerHeight/2 }; 
+
+    // --- ИНИЦИАЛИЗАЦИЯ ---
+    function init() {
+        renderSpacesSidebar();
+        loadSpaceData(currentSpace);
+        window.addEventListener('beforeunload', saveCurrentSpaceData);
+        updateTransform();
+    }
+
+    // --- 2. ИСТОРИЯ И ДАННЫЕ ---
+    function recordAction() {
+        if(historyStack.length > 40) historyStack.shift();
+        historyStack.push(JSON.stringify({nodes, edges, idCounter}));
+    }
+
+    function undo() {
+        if(!historyStack.length) return;
+        const d = JSON.parse(historyStack.pop());
+        nodes = d.nodes; edges = d.edges; idCounter = d.idCounter;
+        deselectNode(); renderAll(); saveCurrentSpaceData();
+    }
+
+    function saveCurrentSpaceData() {
+        const data = { nodes, edges, idCounter, state };
+        localStorage.setItem(`ob_space_${currentSpace}`, JSON.stringify(data));
+    }
+
+    function loadSpaceData(name) {
+        const raw = localStorage.getItem(`ob_space_${name}`);
+        if(raw) {
+            const data = JSON.parse(raw);
+            nodes = data.nodes || []; edges = data.edges || []; idCounter = data.idCounter || 1;
+            state = data.state || { scale: 1, panX: window.innerWidth/2, panY: window.innerHeight/2 };
+        } else {
+            nodes = []; edges = []; idCounter = 1;
+            state = { scale: 1, panX: window.innerWidth/2, panY: window.innerHeight/2 };
+            addNodeData({ x: 50, y: 50, type: 'text', title: 'Start', content: 'Liquid Canvas' });
+        }
+        historyStack = []; deselectNode(); renderAll(); updateTransform();
+    }
+    
+    // --- 3. СОЗДАНИЕ НОД ---
+    function addNodeData(data) {
+        recordAction();
+        const id = data.id || ('node-' + idCounter++);
+        const w = data.width || (['video','image'].includes(data.type) ? 320 : 260);
+        const newNode = { ...data, id, width: w, color: data.color||'default', shape: data.shape||'default' };
+        nodes.push(newNode); saveCurrentSpaceData(); return newNode;
+    }
+
+    function spawnNode(type) {
+        const c = getWorldMousePosition();
+        const cx = c.x - 130; 
+        const cy = c.y - 50;
+        if (type === 'task') {
+            const taskHtml = `<div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" value="Task" oninput="saveNodeState(this)"><input type="date" class="task-date" onchange="saveNodeState(this)"></div><button class="add-task-btn" onclick="addTaskRow(this)">+ Add</button>`;
+            createNode(cx, cy, 'task', 'To-Do', taskHtml);
+        } else {
+            createNode(cx, cy, 'text', 'Note', 'Text...');
+        }
+    }
+
+    function createNode(x, y, type, title, content) { addNodeData({ x, y, type, title, content }); renderAll(); }
+
+    function renderAll() {
+        document.querySelectorAll('.node').forEach(n => n.remove());
+        const defs = svgLayer.querySelector('defs');
+        svgLayer.innerHTML = '';
+        if(defs) svgLayer.appendChild(defs);
+        nodes.forEach(n => createNodeDOM(n));
+        edges.forEach(e => createEdgeDOM(e));
+    }
+
+    function createNodeDOM(node) {
+        const el = document.createElement('div');
+        el.id = node.id;
+        // Здесь присваивается класс для стекла
+        el.className = `node ${window.getGlassClass()} type-${node.type} color-${node.color} shape-${node.shape}`;
+        if(node.id === selectedNodeId) el.classList.add('selected');
+        el.style.left = node.x + 'px'; el.style.top = node.y + 'px'; el.style.width = node.width + 'px';
+
+        let contentHtml = '';
+        if (['image','video'].includes(node.type)) {
+            contentHtml = `<div class="node-content ${node.type==='image'?'content-img':'content-video'}">${node.content}</div>`;
+        } else {
+            contentHtml = `<div class="node-content" ${node.type==='text'?'contenteditable="true"':''}>${node.content}</div>`;
         }
 
-        // --- SPACE MANAGEMENT ---
-        function loadSpace(name) {
-            currentSpace = name;
-            localStorage.setItem('lc_currentSpace', name);
-            const data = localStorage.getItem(`lc_data_${name}`);
-            if (data) {
-                const parsed = JSON.parse(data);
-                nodes = parsed.nodes || [];
-                edges = parsed.edges || [];
-                idCounter = parsed.idCounter || 1;
-                // Сохраняем позицию камеры если есть
-                if(parsed.view) { state.panX = parsed.view.x; state.panY = parsed.view.y; state.scale = parsed.view.scale; }
-            } else {
-                nodes = []; edges = []; idCounter = 1;
-                // Демо контент
-                createNode(0, 0, 'text', 'Welcome', 'Это ваш бесконечный холст.<br>Двигайте колесиком мыши.<br>Зажмите пробел для панорамирования.');
-            }
-            renderAll();
-            renderSidebar();
-            updateTransform();
-        }
-
-        function saveData() {
-            const data = { nodes, edges, idCounter, view: {x: state.panX, y: state.panY, scale: state.scale} };
-            localStorage.setItem(`lc_data_${currentSpace}`, JSON.stringify(data));
-        }
-
-        // --- RENDERING ---
-        function renderAll() {
-            // Очистка нод
-            document.querySelectorAll('.node').forEach(el => el.remove());
-            // Очистка связей
-            while (svgLayer.firstChild) svgLayer.removeChild(svgLayer.firstChild);
-
-            nodes.forEach(n => renderNodeDOM(n));
-            edges.forEach(e => renderEdgeDOM(e));
-        }
-
-        function renderNodeDOM(node) {
-            const el = document.createElement('div');
-            el.className = `node type-${node.type} color-${node.color || 'default'} shape-${node.shape || 'default'}`;
-            el.id = node.id;
-            el.style.left = node.x + 'px';
-            el.style.top = node.y + 'px';
-            if (node.width) el.style.width = node.width + 'px';
-
-            let contentHtml = '';
-            if (node.type === 'text' || node.type === 'link') {
-                contentHtml = `<div class="node-content" contenteditable="true" onblur="updateContent('${node.id}', this)">${node.content}</div>`;
-            } else if (node.type === 'task') {
-                contentHtml = `<div class="node-content">${node.content} <div class="task-add" onclick="addTaskRow('${node.id}', this)">+ Add Item</div></div>`;
-            } else if (node.type === 'image') {
-                contentHtml = `<div class="node-media">${node.content}</div>`;
-            }
-
-            el.innerHTML = `
-                <div class="node-header" onmousedown="startNodeDrag(event, '${node.id}')">
-                    <span class="node-title" contenteditable="true" onblur="updateTitle('${node.id}', this)">${node.title}</span>
-                </div>
+        el.innerHTML = `
+            <div class="node-wrapper">
+                <div class="node-header"><span class="header-text">${node.title}</span></div>
                 ${contentHtml}
-                <div class="resizer" onmousedown="startResize(event, '${node.id}')"></div>
-                <!-- Точки подключения -->
-                <div class="handle h-top" data-side="top" onmousedown="startConnect(event, '${node.id}', 'top')"></div>
-                <div class="handle h-right" data-side="right" onmousedown="startConnect(event, '${node.id}', 'right')"></div>
-                <div class="handle h-bottom" data-side="bottom" onmousedown="startConnect(event, '${node.id}', 'bottom')"></div>
-                <div class="handle h-left" data-side="left" onmousedown="startConnect(event, '${node.id}', 'left')"></div>
-            `;
-            
-            // Клик для выделения
-            el.addEventListener('mousedown', (e) => {
-                if(!e.target.classList.contains('handle')) selectNode(node.id);
-            });
-
-            world.appendChild(el);
-        }
-
-        function renderEdgeDOM(edge) {
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.classList.add("connection");
-            path.id = edge.id;
-            path.addEventListener('click', (e) => { 
-                if(confirm('Delete connection?')) {
-                    edges = edges.filter(ed => ed.id !== edge.id);
-                    renderAll(); saveData();
-                }
-            });
-            svgLayer.appendChild(path);
-            updateEdgePath(edge);
-        }
-
-        function updateEdgePath(edge) {
-            const el = document.getElementById(edge.id);
-            if (!el) return;
-            const p1 = getHandlePos(edge.from, edge.sideFrom);
-            const p2 = getHandlePos(edge.to, edge.sideTo);
-            
-            // Кривая Безье
-            const dx = Math.abs(p1.x - p2.x) * 0.5;
-            let c1x = p1.x, c1y = p1.y, c2x = p2.x, c2y = p2.y;
-            
-            if(edge.sideFrom === 'top') c1y -= dx; else if(edge.sideFrom === 'bottom') c1y += dx; else if(edge.sideFrom === 'left') c1x -= dx; else c1x += dx;
-            if(edge.sideTo === 'top') c2y -= dx; else if(edge.sideTo === 'bottom') c2y += dx; else if(edge.sideTo === 'left') c2x -= dx; else c2x += dx;
-
-            el.setAttribute("d", `M ${p1.x} ${p1.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2.x} ${p2.y}`);
-        }
-
-        function getHandlePos(nodeId, side) {
-            const el = document.getElementById(nodeId);
-            if (!el) return {x:0, y:0};
-            const r = { x: parseFloat(el.style.left), y: parseFloat(el.style.top), w: el.offsetWidth, h: el.offsetHeight };
-            if (side === 'top') return { x: r.x + r.w/2, y: r.y };
-            if (side === 'bottom') return { x: r.x + r.w/2, y: r.y + r.h };
-            if (side === 'left') return { x: r.x, y: r.y + r.h/2 };
-            return { x: r.x + r.w, y: r.y + r.h/2 };
-        }
-
-        // --- INTERACTION ---
-        let dragMode = null; // 'pan', 'node', 'resize', 'connect'
-        let activeObj = null;
-        let tempLine = null;
-
-        function getWorldPos(e) {
-            return {
-                x: (e.clientX - state.panX) / state.scale,
-                y: (e.clientY - state.panY) / state.scale
-            };
-        }
-
-        function onPointerDown(e) {
-            if (e.target === viewport || e.target === world || e.target.id === 'grid-bg') {
-                dragMode = 'pan';
-                state.startX = e.clientX;
-                state.startY = e.clientY;
-                viewport.style.cursor = 'grabbing';
-                deselectNode();
-            }
-        }
-
-        function startNodeDrag(e, id) {
-            if (e.target.isContentEditable) return;
-            e.stopPropagation();
-            dragMode = 'node';
-            activeObj = { id, offset: getWorldPos(e) };
-            const n = nodes.find(x => x.id === id);
-            activeObj.initX = n.x; activeObj.initY = n.y;
-            selectNode(id);
-        }
-
-        function startResize(e, id) {
-            e.stopPropagation();
-            dragMode = 'resize';
-            activeObj = { id, startX: e.clientX };
-            const n = nodes.find(x => x.id === id);
-            activeObj.startW = n.width || 240;
-        }
-
-        function startConnect(e, id, side) {
-            e.stopPropagation();
-            dragMode = 'connect';
-            activeObj = { id, side };
-            tempLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            tempLine.setAttribute("class", "connection");
-            tempLine.style.pointerEvents = "none";
-            svgLayer.appendChild(tempLine);
-        }
-
-        function onPointerMove(e) {
-            if (!dragMode) return;
-
-            if (dragMode === 'pan') {
-                const dx = e.clientX - state.startX;
-                const dy = e.clientY - state.startY;
-                state.panX += dx; state.panY += dy;
-                state.startX = e.clientX; state.startY = e.clientY;
-                updateTransform();
-            } else if (dragMode === 'node') {
-                const wp = getWorldPos(e);
-                const n = nodes.find(x => x.id === activeObj.id);
-                n.x = activeObj.initX + (wp.x - activeObj.offset.x);
-                n.y = activeObj.initY + (wp.y - activeObj.offset.y);
-                const el = document.getElementById(n.id);
-                el.style.left = n.x + 'px'; el.style.top = n.y + 'px';
-                updateContextMenuPos();
-                edges.filter(ed => ed.from === n.id || ed.to === n.id).forEach(updateEdgePath);
-            } else if (dragMode === 'resize') {
-                const dx = (e.clientX - activeObj.startX) / state.scale;
-                const n = nodes.find(x => x.id === activeObj.id);
-                n.width = Math.max(150, activeObj.startW + dx);
-                document.getElementById(n.id).style.width = n.width + 'px';
-                updateContextMenuPos();
-                edges.filter(ed => ed.from === n.id || ed.to === n.id).forEach(updateEdgePath);
-            } else if (dragMode === 'connect') {
-                const wp = getWorldPos(e);
-                const p1 = getHandlePos(activeObj.id, activeObj.side);
-                const d = `M ${p1.x} ${p1.y} L ${wp.x} ${wp.y}`;
-                tempLine.setAttribute("d", d);
-            }
-        }
-
-        function onPointerUp(e) {
-            if (dragMode === 'connect') {
-                const target = document.elementFromPoint(e.clientX, e.clientY);
-                if (target && target.classList.contains('handle')) {
-                    const targetNode = target.closest('.node');
-                    const sideTo = target.getAttribute('data-side');
-                    if (targetNode.id !== activeObj.id) {
-                        edges.push({
-                            id: 'e' + Date.now(),
-                            from: activeObj.id, sideFrom: activeObj.side,
-                            to: targetNode.id, sideTo: sideTo
-                        });
-                        renderAll();
-                    }
-                }
-                tempLine.remove();
-            }
-            if (dragMode) saveData();
-            dragMode = null;
-            viewport.style.cursor = 'grab';
-        }
-
-        function onWheel(e) {
-            if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
-                const zoomIntensity = 0.1;
-                const delta = -Math.sign(e.deltaY) * zoomIntensity;
-                const oldScale = state.scale;
-                let newScale = state.scale * (1 + delta);
-                newScale = Math.min(Math.max(0.2, newScale), 5); // Limits
-
-                // Zoom towards mouse
-                const rect = viewport.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
-                
-                // Calculate position relative to world
-                const worldX = (mouseX - state.panX) / oldScale;
-                const worldY = (mouseY - state.panY) / oldScale;
-
-                state.panX = mouseX - worldX * newScale;
-                state.panY = mouseY - worldY * newScale;
-                state.scale = newScale;
-                
-                updateTransform();
-            }
-        }
-
-        function updateTransform() {
-            world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
-            // Сетку двигаем через background-position, чтобы создать эффект бесконечности, но масштаб применяем визуально
-            const bg = document.getElementById('grid-bg');
-            // Хак: мы просто делаем grid-bg огромным и фиксированным внутри world, это проще всего
-        }
-
-        // --- NODE LOGIC ---
-        function spawnNode(type) {
-            const center = { x: -state.panX/state.scale + window.innerWidth/2/state.scale, y: -state.panY/state.scale + window.innerHeight/2/state.scale };
-            if (type === 'text') createNode(center.x, center.y, 'text', 'Note', 'New text node');
-            if (type === 'task') createNode(center.x, center.y, 'task', 'To-Do', getTaskHtml());
-            if (type === 'link') openModal('Add Link', 'Enter URL:', (val) => createNode(center.x, center.y, 'link', 'Link', `<a href="${val}" target="_blank">${val}</a>`));
-        }
+            </div>
+            <div class="resizer"></div>
+            <div class="handle h-top" data-side="top"></div>
+            <div class="handle h-right" data-side="right"></div>
+            <div class="handle h-bottom" data-side="bottom"></div>
+            <div class="handle h-left" data-side="left"></div>
+        `;
         
-        function createNode(x, y, type, title, content) {
-            const newNode = {
-                id: 'n' + (idCounter++),
-                x: x - 100, y: y - 50,
-                type, title, content,
-                width: type==='image'? 300 : 240
-            };
-            nodes.push(newNode);
-            renderAll();
-            saveData();
+        if(node.shape === 'round') el.style.borderRadius = '32px';
+
+        const headerSpan = el.querySelector('.header-text');
+        headerSpan.addEventListener('dblclick', (e) => { e.stopPropagation(); headerSpan.contentEditable = true; headerSpan.focus(); document.execCommand('selectAll',false,null); });
+        headerSpan.addEventListener('blur', () => { headerSpan.contentEditable = false; if(node.title !== headerSpan.innerText) { node.title = headerSpan.innerText; saveCurrentSpaceData(); } });
+        headerSpan.addEventListener('keydown', e => { if(e.key==='Enter') headerSpan.blur(); });
+        
+        if(node.type==='text') {
+            const cDiv = el.querySelector('.node-content');
+            cDiv.addEventListener('input', () => { node.content = cDiv.innerHTML; saveCurrentSpaceData(); });
         }
 
-        function updateTitle(id, el) {
-            const n = nodes.find(x => x.id === id);
-            if(n) { n.title = el.innerText; saveData(); }
+        world.appendChild(el);
+        attachEvents(el, node);
+    }
+
+    function attachEvents(el, node) {
+        el.querySelector('.node-header').addEventListener('mousedown', (e) => {
+            if(e.target.isContentEditable) return;
+            e.stopPropagation(); selectNode(node);
+            const mouseWorld = getWorldMousePosition(e.clientX, e.clientY);
+            dragObj = { type: 'node', node, ix: node.x, iy: node.y, ox: mouseWorld.x - node.x, oy: mouseWorld.y - node.y };
+        });
+        el.querySelector('.resizer').addEventListener('mousedown', (e) => {
+            e.stopPropagation(); dragObj = { type: 'resize', node, startX: e.clientX, startW: node.width };
+        });
+        el.querySelectorAll('.handle').forEach(h => {
+            h.addEventListener('mousedown', (e) => {
+                e.stopPropagation(); connectStart = { id: node.id, side: h.dataset.side };
+                tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                tempLine.setAttribute('class', 'connection temp'); svgLayer.appendChild(tempLine);
+            });
+        });
+    }
+
+    // --- 4. ВЗАИМОДЕЙСТВИЕ (МЫШЬ) ---
+    window.addEventListener('mousedown', (e) => {
+        if(e.target.closest('#style-menu') || e.target.closest('.node') || e.target.closest('#modal-box') || e.target.closest('#sidebar') || e.target.closest('.toolbar')) return;
+        if(e.target === viewport || e.target === world) {
+            dragObj = { type: 'view', lx: e.clientX, ly: e.clientY };
+            viewport.style.cursor = 'grabbing'; deselectNode();
         }
-        function updateContent(id, el) {
-            const n = nodes.find(x => x.id === id);
-            if(n) { n.content = el.innerHTML; saveData(); }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        mousePos.x = e.clientX; mousePos.y = e.clientY;
+        const worldPos = getWorldMousePosition(mousePos.x, mousePos.y);
+
+        if (!dragObj && !connectStart) return;
+
+        if (dragObj?.type === 'view') {
+            state.panX += mousePos.x - dragObj.lx; state.panY += mousePos.y - dragObj.ly;
+            dragObj.lx = mousePos.x; dragObj.ly = mousePos.y;
+            updateTransform(); updateStyleMenu();
+        } else if (dragObj?.type === 'node') {
+            const n = dragObj.node;
+            n.x = worldPos.x - dragObj.ox; n.y = worldPos.y - dragObj.oy;
+            const el = document.getElementById(n.id);
+            if(el) { el.style.left = n.x + 'px'; el.style.top = n.y + 'px'; }
+            updateConnectedEdges(n.id); updateStyleMenu();
+        } else if (dragObj?.type === 'resize') {
+            const n = dragObj.node;
+            const newW = Math.max(150, dragObj.startW + (mousePos.x - dragObj.startX) / state.scale);
+            n.width = newW;
+            const el = document.getElementById(n.id);
+            if(el) el.style.width = newW + 'px';
+            updateConnectedEdges(n.id); updateStyleMenu();
+        } else if (connectStart) {
+            const sn = nodes.find(n => n.id === connectStart.id);
+            const sp = getHandlePos(sn.id, connectStart.side);
+            drawCurve(tempLine, sp.x, sp.y, worldPos.x, worldPos.y, connectStart.side, null);
         }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+        if(dragObj?.type === 'node' || dragObj?.type === 'resize') { recordAction(); saveCurrentSpaceData(); }
+        dragObj = null; viewport.style.cursor = 'grab';
+
+        if(connectStart) {
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            if(el && el.classList.contains('handle')) {
+                const tn = el.closest('.node');
+                if(tn.id !== connectStart.id) {
+                    recordAction();
+                    edges.push({ id:`e${Date.now()}`, from: connectStart.id, fSide: connectStart.side, to: tn.id, tSide: el.dataset.side });
+                    createEdgeDOM(edges[edges.length-1]);
+                    saveCurrentSpaceData();
+                }
+            }
+            if(tempLine) tempLine.remove();
+            tempLine = null; connectStart = null;
+        }
+    });
+
+    // --- PASTE SUPPORT ---
+    window.addEventListener('paste', (e) => {
+        if(e.target.isContentEditable || e.target.tagName === 'INPUT') return;
+        e.preventDefault();
         
-        // Task Helpers
-        function getTaskHtml() {
-            return `<div class="task-row"><div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" value="Task 1" oninput="saveNodeHtml(this)"></div>`;
+        const c = getWorldMousePosition();
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let item of items) {
+            if (item.kind === 'file') {
+                const blob = item.getAsFile();
+                handleFile(blob, item.type.includes('image') ? 'image' : 'video', {x: c.x - 150, y: c.y - 100});
+                return;
+            }
         }
-        window.addTaskRow = function(id, btn) {
+        const text = e.clipboardData.getData('text');
+        if (text) {
+             if(text.match(/^http/)) createNode(c.x - 130, c.y - 50, 'link', 'Link', `<a href="${text}" target="_blank">${text}</a>`);
+             else createNode(c.x - 130, c.y - 50, 'text', 'Note', text);
+        }
+    });
+
+    // --- SHORTCUTS ---
+    window.addEventListener('keydown', (e) => {
+        if((e.key === 'Delete' || e.key === 'Backspace') && !e.target.isContentEditable && e.target.tagName !== 'INPUT') deleteSelectedNode();
+        if((e.ctrlKey||e.metaKey) && e.key==='z') undo();
+    });
+
+    // --- 5. МАТЕМАТИКА И УТИЛИТЫ ---
+    function getWorldMousePosition(screenX, screenY) {
+        const sx = screenX !== undefined ? screenX : mousePos.x;
+        const sy = screenY !== undefined ? screenY : mousePos.y;
+        const rect = viewport.getBoundingClientRect();
+        return {
+            x: (sx - rect.left - state.panX) / state.scale,
+            y: (sy - rect.top - state.panY) / state.scale
+        };
+    }
+
+    function drawCurve(el, x1, y1, x2, y2, s1, s2) {
+        const sx=x1+SVG_OFFSET, sy=y1+SVG_OFFSET, ex=x2+SVG_OFFSET, ey=y2+SVG_OFFSET;
+        let c1x=sx, c1y=sy, c2x=ex, c2y=ey;
+        const dist = Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+        const off = Math.min(dist * 0.5, 150);
+        if(s1==='top') c1y-=off; else if(s1==='bottom') c1y+=off; else if(s1==='left') c1x-=off; else c1x+=off;
+        if(s2) { if(s2==='top') c2y-=off; else if(s2==='bottom') c2y+=off; else if(s2==='left') c2x-=off; else c2x+=off; }
+        el.setAttribute('d', `M ${sx} ${sy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${ex} ${ey}`);
+    }
+
+    function createEdgeDOM(edge) {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.id = edge.id; path.setAttribute('class', 'connection');
+        path.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); 
+            openModal({title:'Delete?', confirmText:'Delete', onConfirm:()=>{
+                recordAction(); edges = edges.filter(x=>x.id!==edge.id); path.remove(); saveCurrentSpaceData();
+            }});
+        });
+        svgLayer.appendChild(path); updateEdgePath(edge);
+    }
+    function updateConnectedEdges(nid) { edges.forEach(e => { if(e.from===nid || e.to===nid) updateEdgePath(e); }); }
+    function updateEdgePath(e) {
+        const el = document.getElementById(e.id);
+        if(el) {
+            const p1 = getHandlePos(e.from, e.fSide);
+            const p2 = getHandlePos(e.to, e.tSide);
+            drawCurve(el, p1.x, p1.y, p2.x, p2.y, e.fSide, e.tSide);
+        }
+    }
+    function getHandlePos(nid, side) {
+        const el = document.getElementById(nid);
+        if(!el) return {x:0,y:0};
+        const x = parseFloat(el.style.left), y = parseFloat(el.style.top);
+        const w = el.offsetWidth, h = el.offsetHeight;
+        if(side==='top') return {x:x+w/2, y};
+        if(side==='right') return {x:x+w, y:y+h/2};
+        if(side==='bottom') return {x:x+w/2, y:y+h};
+        if(side==='left') return {x, y:y+h/2};
+        return {x,y};
+    }
+
+    // --- 6. ЗАДАЧИ И ФАЙЛЫ ---
+    window.toggleTask = function(btn) { 
+        btn.parentElement.classList.toggle('done'); 
+        saveNodeState(btn); 
+    };
+    window.addTaskRow = function(btn) {
+        const row = document.createElement('div'); 
+        row.className = 'task-row';
+        row.innerHTML = `<div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" oninput="saveNodeState(this)"><input type="date" class="task-date" onchange="saveNodeState(this)">`;
+        btn.before(row); 
+        row.querySelector('.task-input').focus(); 
+        saveNodeState(btn);
+    };
+    window.saveNodeState = function(el) {
+        const nEl = el.closest('.node');
+        if(nEl) {
+            const node = nodes.find(n => n.id === nEl.id);
+            const contentEl = nEl.querySelector('.node-content');
+            contentEl.querySelectorAll('input').forEach(i => i.setAttribute('value', i.value));
+            if(node) { node.content = contentEl.innerHTML; saveCurrentSpaceData(); }
+        }
+    }
+    
+    function openMediaModal(type) {
+        openModal({
+            title: type==='image'?'Add Image':'Add Video',
+            extraHtml: `<button class="btn primary" onclick="triggerFile('${type}')" style="width:100%; padding:14px; margin-bottom:15px;">Upload</button><div style="text-align:center; color:#888; margin-bottom:10px;">OR Link:</div>`,
+            inputPlaceholder: 'https://...',
+            onConfirm: (url) => {
+                if(url) {
+                    const c = getWorldMousePosition();
+                    if(type==='image') createNode(c.x-150, c.y-100, 'image', 'Image', `<img src="${url}">`);
+                    else createVideoNode(c.x-150, c.y-100, url);
+                }
+            }
+        });
+    }
+    
+    function triggerFile(type) { closeModal(); fileInput.setAttribute('accept', type==='image'?'image/*':'video/*'); fileInput.click(); fileInput.onchange = e => { const f=e.target.files[0]; if(f) handleFile(f,type); fileInput.value=''; }; }
+    function handleFile(f, t, c) { if(!c) c=getWorldMousePosition(window.innerWidth/2+100, window.innerHeight/2); const r = new FileReader(); r.onload = e => createNode(c.x, c.y, t, t==='image'?'Image':'Video', t==='image'?`<img src="${e.target.result}">`:`<video src="${e.target.result}" controls></video>`); r.readAsDataURL(f); }
+    function createVideoNode(x, y, url) { const yt = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/); const c = yt ? `<iframe src=" allowfullscreen></iframe>` : `<video src="${url}" controls></video>`; createNode(x, y, 'video', 'Video', c); }
+    function openLinkModal() { openModal({ title: 'Add Link', inputPlaceholder: 'https://...', onConfirm: (u) => { if(u) createNode(getWorldMousePosition().x-130, getWorldMousePosition().y-50, 'link', 'Link', `<a href="${u}" target="_blank">${u}</a>`); } }); }
+
+    // --- 7. UI ---
+    function openModal({ title, message, inputPlaceholder, inputValue, confirmText='OK', onConfirm, extraHtml='' }) {
+        modalTitle.innerText = title; modalMsg.innerText = message||''; modalMsg.style.display = message?'block':'none'; modalBody.innerHTML = extraHtml;
+        let inputEl = null;
+        if (inputPlaceholder) {
+            inputEl = document.createElement('input'); inputEl.className = 'modal-input';
+            inputEl.placeholder = inputPlaceholder; inputEl.value = inputValue||'';
+            modalBody.appendChild(inputEl); setTimeout(() => inputEl.focus(), 100);
+            inputEl.onkeydown = (e) => { if(e.key==='Enter') doConfirm(); };
+        }
+        modalConfirmBtn.innerText = confirmText;
+        modalConfirmBtn.onclick = doConfirm;
+        function doConfirm() { if (onConfirm(inputEl ? inputEl.value : null) !== false) closeModal(); }
+        modal.style.display = 'flex';
+    }
+    function closeModal() { modal.style.display = 'none'; modalBody.innerHTML = ''; }
+    
+    function renderSpacesSidebar() {
+        const list = document.getElementById('space-list'); list.innerHTML = '';
+        spaces.forEach(name => {
             const div = document.createElement('div');
-            div.className = 'task-row';
-            div.innerHTML = `<div class="task-check" onclick="toggleTask(this)"></div><input type="text" class="task-input" placeholder="New task..." oninput="saveNodeHtml(this)">`;
-            btn.before(div);
-            saveNodeHtml(btn);
-        };
-        window.toggleTask = function(el) {
-            el.parentNode.classList.toggle('done');
-            saveNodeHtml(el);
-        };
-        window.saveNodeHtml = function(el) {
-            const nodeEl = el.closest('.node');
-            const contentDiv = nodeEl.querySelector('.node-content');
-            // Переносим value инпутов в атрибуты для сохранения
-            contentDiv.querySelectorAll('input').forEach(i => i.setAttribute('value', i.value));
-            const n = nodes.find(x => x.id === nodeEl.id);
-            if(n) { n.content = contentDiv.innerHTML; saveData(); }
-        }
+            div.className = `space-item ${name === currentSpace ? 'active' : ''}`;
+            div.innerHTML = `<span class="space-item-name">${name}</span>${spaces.length > 1 ? `<span class="space-del">✕</span>` : ''}`;
+            div.onclick = (e) => { if(e.target.classList.contains('space-del')) confirmDeleteSpace(name); else switchSpace(name); };
+            div.ondblclick = (e) => { if(!e.target.classList.contains('space-del')) openRenameSpaceModal(name); };
+            list.appendChild(div);
+        });
+    }
+    function switchSpace(name) { if(name === currentSpace) return; saveCurrentSpaceData(); currentSpace = name; localStorage.setItem('ob_currentSpace', name); loadSpaceData(name); renderSpacesSidebar(); }
+    function openCreateSpaceModal() { openModal({ title: 'New Space', inputPlaceholder: 'Name...', onConfirm: (n) => { if(n&&!spaces.includes(n)){ saveCurrentSpaceData(); spaces.push(n); localStorage.setItem('ob_spaces',JSON.stringify(spaces)); switchSpace(n); } } }); }
+    function openRenameSpaceModal(old) { openModal({ title: 'Rename Space', inputPlaceholder: 'New Name', inputValue: old, onConfirm: (n) => { if(n&&n!==old&&!spaces.includes(n)){ saveCurrentSpaceData(); const d=localStorage.getItem(`ob_space_${old}`); if(d){localStorage.setItem(`ob_space_${n}`,d); localStorage.removeItem(`ob_space_${old}`);} spaces[spaces.indexOf(old)]=n; localStorage.setItem('ob_spaces',JSON.stringify(spaces)); if(currentSpace===old){currentSpace=n; localStorage.setItem('ob_currentSpace',n);} renderSpacesSidebar(); } } }); }
+    function confirmDeleteSpace(n) { openModal({ title: 'Delete Space?', message: `Are you sure you want to delete "${n}"?`, confirmText: 'Delete', onConfirm: () => { spaces=spaces.filter(s=>s!==n); localStorage.removeItem(`ob_space_${n}`); localStorage.setItem('ob_spaces',JSON.stringify(spaces)); if(currentSpace===n) switchSpace(spaces[0]); else renderSpacesSidebar(); } }); }
+    function confirmClearCanvas() { openModal({ title: 'Clear Canvas?', confirmText: 'Clear', onConfirm: () => { recordAction(); nodes=[]; edges=[]; renderAll(); saveCurrentSpaceData(); } }); }
+    
+    function downloadBackup() { saveCurrentSpaceData(); const d={}; Object.keys(localStorage).forEach(k=>{if(k.startsWith('ob_'))d[k]=localStorage.getItem(k)}); const b=new Blob([JSON.stringify(d)],{type:'application/json'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=`backup-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(u); }
+    function triggerRestore() { backupInput.click(); }
+    backupInput.onchange = e => { const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=ev=>{ try{const d=JSON.parse(ev.target.result); if(!d.ob_spaces)throw 1; Object.keys(localStorage).forEach(k=>{if(k.startsWith('ob_'))localStorage.removeItem(k)}); Object.keys(d).forEach(k=>localStorage.setItem(k,d[k])); location.reload(); }catch(e){alert('Backup Error');} }; r.readAsText(f); backupInput.value=''; };
 
-        // --- SELECTION & STYLES ---
-        function selectNode(id) {
-            selectedNodeId = id;
-            document.querySelectorAll('.node').forEach(el => el.classList.remove('selected'));
-            const el = document.getElementById(id);
-            if(el) {
-                el.classList.add('selected');
-                updateContextMenuPos();
-            }
+    // --- 8. ВЫБОР И СТИЛИ ---
+    function selectNode(n) { selectedNodeId=n.id; document.querySelectorAll('.node').forEach(x=>x.classList.remove('selected')); document.getElementById(n.id)?.classList.add('selected'); updateStyleMenu(); }
+    function deselectNode() { selectedNodeId=null; document.querySelectorAll('.node').forEach(x=>x.classList.remove('selected')); styleMenu.style.display='none'; }
+    function deleteSelectedNode() { if(selectedNodeId){ recordAction(); nodes=nodes.filter(n=>n.id!==selectedNodeId); edges=edges.filter(e=>e.from!==selectedNodeId&&e.to!==selectedNodeId); deselectNode(); renderAll(); saveCurrentSpaceData(); } }
+    
+    function updateStyleMenu() {
+        if(!selectedNodeId) { styleMenu.style.display='none'; return; }
+        const el = document.getElementById(selectedNodeId);
+        if(el) { 
+            const r = el.getBoundingClientRect(); 
+            styleMenu.style.display = 'flex'; 
+            styleMenu.style.left = (r.left + r.width/2) + 'px'; 
+            styleMenu.style.top = (r.top - 60) + 'px'; 
         }
-        
-        function deselectNode() {
-            selectedNodeId = null;
-            document.querySelectorAll('.node').forEach(el => el.classList.remove('selected'));
-            contextMenu.style.display = 'none';
-        }
+    }
+    
+    function applyStyle(prop, val) { 
+        if(selectedNodeId) { 
+            const n = nodes.find(x => x.id === selectedNodeId); 
+            recordAction(); 
+            n[prop] = val; 
+            renderAll(); 
+            selectNode(n); 
+            saveCurrentSpaceData(); 
+        } 
+    }
+    
+    // --- 9. ТРАНСФОРМАЦИЯ И ЗУМ ---
+    function updateTransform() { 
+        // Фон с точками масштабируется вместе с блоком #world
+        world.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`; 
+        // Мы убрали ручное смещение backgroundPosition, чтобы точки не "ездили" по фону
+    }
+    
+    viewport.addEventListener('wheel', (e) => { 
+        e.preventDefault(); 
+        const d = e.deltaY > 0 ? 0.9 : 1.1; 
+        state.scale = Math.min(Math.max(0.1, state.scale * d), 5); 
+        updateTransform(); 
+        updateStyleMenu(); 
+    }, {passive:false});
 
-        function updateContextMenuPos() {
-            if(!selectedNodeId) return;
-            const el = document.getElementById(selectedNodeId);
-            const rect = el.getBoundingClientRect();
-            contextMenu.style.display = 'flex';
-            contextMenu.style.left = (rect.left + rect.width/2 - contextMenu.offsetWidth/2) + 'px';
-            contextMenu.style.top = (rect.top - 50) + 'px';
-        }
-
-        function applyStyle(prop, val) {
-            if(!selectedNodeId) return;
-            const n = nodes.find(x => x.id === selectedNodeId);
-            n[prop] = val;
-            renderAll();
-            selectNode(selectedNodeId);
-            saveData();
-        }
-
-        function deleteSelectedNode() {
-            if(!selectedNodeId) return;
-            nodes = nodes.filter(n => n.id !== selectedNodeId);
-            edges = edges.filter(e => e.from !== selectedNodeId && e.to !== selectedNodeId);
-            deselectNode();
-            renderAll();
-            saveData();
-        }
-        
-        function confirmClearCanvas() {
-            if(confirm('Clear current canvas?')) {
-                nodes = []; edges = [];
-                renderAll(); saveData();
-            }
-        }
-
-        // --- MEDIA & FILES ---
-        function openMediaModal(type) {
-            openModal('Add Image', 'Enter Image URL:', (val) => {
-                const center = { x: -state.panX/state.scale + window.innerWidth/2/state.scale, y: -state.panY/state.scale + window.innerHeight/2/state.scale };
-                createNode(center.x, center.y, 'image', 'Image', `<img src="${val}">`);
-            });
-            // Add upload btn logic if needed
-        }
-
-        // --- UI HELPERS ---
-        function renderSidebar() {
-            const list = document.getElementById('space-list');
-            list.innerHTML = '';
-            spaces.forEach(s => {
-                const div = document.createElement('div');
-                div.className = `space-item ${s === currentSpace ? 'active' : ''}`;
-                div.innerHTML = `<span onclick="loadSpace('${s}')">${s}</span> <span class="space-del" onclick="deleteSpace('${s}')">×</span>`;
-                list.appendChild(div);
-            });
-        }
-        
-        function openCreateSpaceModal() {
-            openModal('New Space', 'Name:', (val) => {
-                if(val && !spaces.includes(val)) {
-                    spaces.push(val); localStorage.setItem('lc_spaces', JSON.stringify(spaces));
-                    loadSpace(val);
-                }
-            });
-        }
-        
-        function deleteSpace(name) {
-            if(spaces.length <= 1) return alert('Cannot delete last space');
-            if(confirm(`Delete "${name}"?`)) {
-                spaces = spaces.filter(s => s !== name);
-                localStorage.setItem('lc_spaces', JSON.stringify(spaces));
-                localStorage.removeItem(`lc_data_${name}`);
-                loadSpace(spaces[0]);
-            }
-        }
-
-        // Modal Logic
-        const modal = document.getElementById('modal-overlay');
-        let onModalConfirm = null;
-        function openModal(title, placeholder, cb) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-body').innerHTML = `<input class="modal-input" id="modal-inp" placeholder="${placeholder}">`;
-            onModalConfirm = cb;
-            modal.style.display = 'flex';
-            setTimeout(()=>document.getElementById('modal-inp').focus(), 100);
-        }
-        document.getElementById('modal-confirm-btn').onclick = () => {
-            const val = document.getElementById('modal-inp').value;
-            if(val && onModalConfirm) onModalConfirm(val);
-            closeModal();
-        };
-        function closeModal() { modal.style.display = 'none'; onModalConfirm = null; }
-
-        // Backup
-        function downloadBackup() {
-            saveData();
-            const allData = {};
-            Object.keys(localStorage).forEach(k => { if(k.startsWith('lc_')) allData[k] = localStorage.getItem(k); });
-            const blob = new Blob([JSON.stringify(allData)], {type: 'application/json'});
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = 'liquid-canvas-backup.json'; a.click();
-        }
-        function triggerRestore() { fileInput.click(); }
-        fileInput.onchange = (e) => {
-            const f = e.target.files[0];
-            if(!f) return;
-            const r = new FileReader();
-            r.onload = (ev) => {
-                try {
-                    const d = JSON.parse(ev.target.result);
-                    Object.keys(d).forEach(k => localStorage.setItem(k, d[k]));
-                    location.reload();
-                } catch(err) { alert('Invalid file'); }
-            };
-            r.readAsText(f);
-        }
-
-        // START
-        init();
-    </script>
+    // START
+    init();
+</script>
 </body>
 </html>
